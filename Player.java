@@ -1,4 +1,4 @@
-import java.util.ArrayList;i
+import java.util.ArrayList;
 import java.lang.*;
 
 /* A player is an agent who can perform a move on the board
@@ -14,7 +14,7 @@ private class Player
 	private Color color;
 
 
-	//Constructor Goes Here
+	//Constructor
 	Player(Color color, Tile tile){
 		this.color = color;
 		this.occupiedTiles.Add(tile);
@@ -144,7 +144,43 @@ private class Player
 
 		// Check same diagonal
 		else if((current_tile.row - goal_tile.row) == (current_tile.column - goal_tile.column)){
-			// Code for tile in same diagonal
+			// Same Row & Column (cannot move to same tile)
+			if(current_tile.row == goal_tile.row){
+				return false;
+			}
+
+			// Current < Goal
+			else if(current_tile.row < goal_tile.row){
+				for(i = current_tile.row; i <= goal_tile.row; i++){
+					if((this.board[i][i].getColor() == player.getColor()) || (this.board[i][i].getColor()) == null){
+						continue;
+					}else{
+						return false;
+					}
+				}
+				// Check count
+				distance = abs(current_tile.row - goal_tile.row) - 1;
+				required = ((distance(distance + 1))/2) + 1;
+
+				if(current_tile.count < required){
+					return false;
+				}
+				
+				return true;
+			}
+
+			// Goal < Current
+			else{
+				for(i = current_tile.row; i >= goal_tile.row; i--){
+					if((this.board[i][i].getColor() == player.getColor()) || (this.board[i][i].getColor() == null){
+						continue;
+					}else{
+						return false;
+					}
+				}
+
+				return true;
+			}
 		}
 		
 		// -Debug- Default return false
