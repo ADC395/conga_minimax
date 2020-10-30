@@ -179,6 +179,13 @@ private class Player
 						return false;
 					}
 				}
+				// Check count
+				distance = abs(current_tile.row - goal_tile.row) - 1;
+				required = ((distance(distance + 1))/2) + 1;
+
+				if(current_tile.count < required){
+					return false;
+				}
 
 				return true;
 			}
