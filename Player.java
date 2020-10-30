@@ -39,6 +39,7 @@ private class Player
 	 */
 	public boolean CheckMove(Player player, Tile current_tile, Tile goal_tile)
 	{
+		int distance, required;
 	
 		// Check if goal tile is empty or of same color
 		if((goal_tile.getColor() == null) or (goal_tile.getColor() == player.getColor())){
@@ -64,8 +65,8 @@ private class Player
 					}
 				}
 				// Check count
-				int distance = abs(current_tile.column - goal_tile.column) - 1;
-				int required = (distance(distance + 1))/2;
+				distance = abs(current_tile.column - goal_tile.column) - 1;
+				required = ((distance(distance + 1))/2) + 1;
 				
 				if(current_tile.count < required){
 					return false;
@@ -84,8 +85,8 @@ private class Player
 					}
 				}
 				// Check count
-				int distance = abs(current_tile.column - goal_tile.column) - 1;
-				int required = (distance(distance + 1))/2;
+				distance = abs(current_tile.column - goal_tile.column) - 1;
+				required = ((distance(distance + 1))/2) + 1;
 
 				if(current_tile.count < required){
 					return false;
@@ -112,8 +113,8 @@ private class Player
 					}
 				}		
 				// Check count
-				int distance = abs(current_tile.row - goal_tile.row) - 1;
-				int required = (distance(distance + 1))/2;
+				distance = abs(current_tile.column - goal_tile.column) - 1;
+				required = ((distance(distance + 1))/2) + 1;
 				
 				if(current_tile.count < required){
 					return false;
@@ -132,8 +133,8 @@ private class Player
 					}
 				}			
 				// Check count
-				int distance = abs(current_tile.row - goal_tile.row) - 1;
-				int required = (distance(distance + 1))/2;
+				distance = abs(current_tile.column - goal_tile.column) - 1;
+				required = ((distance(distance + 1))/2) + 1;
 				
 				if(current_tile.count < required){
 					return false;
