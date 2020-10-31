@@ -143,7 +143,8 @@ private class Player
 				return true;
 		}
 
-		// Check same diagonal
+		// Check same diagonal - not correct
+		/*
 		else if((current_tile.row - goal_tile.row) == (current_tile.column - goal_tile.column)){
 			// Same Row & Column (cannot move to same tile)
 			if(current_tile.row == goal_tile.row){
@@ -189,7 +190,7 @@ private class Player
 
 				return true;
 			}
-		}
+		}*/
 		
 		// -Debug- Default return false
 		return false;
@@ -199,13 +200,110 @@ private class Player
 	/* Moves the stones from the Player's current tile to the goal
 	 * tile in a legal fashion
 	 *
+	 * @param	Player 			
 	 * @param	current_tile	The tile the Player wishes to move from
 	 * @param	goal_tile	The tile the Player wishes to move to
 	 * @return	none		Updates board, no return
 	 */
 	public Move(Tile current_tile, Tile goal_tile){
+		int count, rowDistance, colDistance;
 
+		rowDistance = abs(current_tile.row - goal_tile.row);
+		colDistance = abs(current_tile.column - goal_tile.column);
+		
+		// Set count
+		count = current_tile.getCount();
 
+		// Diagonal Move - stuck			
+		if(rowDistance == colDistance){
+			// 
+		}
+
+		// Same Row Move
+		else if(rowDistance == 0){
+			// Current < Goal
+			if(current_tile.column < goal_tile.column){
+				for(i = 0; i <= colDistance; i++){
+					// At current_tile: count = 0
+					if(i == 0){
+						this.board[current_tile.row][current_tile.column + i].setCount(0);
+						continue;
+					}
+					// At goal_tile: count = remaining pcs
+					else if(i == colDistance){
+						this.board[current_tile.row][current_tile.column + i].setCount(count);
+					}
+					// At a tile in between: count = i, update
+					else{
+						this.board[current_tile.row][current_tile.column + i].setCount(i)
+						count = count - i;
+					}
+				}
+
+			}
+			// Current > Goal
+			else{
+				for(i = 0; i <= colDistance; i++){
+					// At current_tile: count = 0
+					if(i == 0){
+						this.board[current_tile.row][curret_tile.column - i].setCount(0);
+						continue;
+					}
+					// At goal_tile: count = reamining pcs
+					else if(i == colDistance){
+						this.board[current_tile.row][current_tile.column - i].setCount(count);
+					}
+					// At atile in between: count = i, update
+					else{
+						this.board[current_tile.row][current_tile.column - i].setCount(i);
+						count = count - i;
+					}
+				}
+			}
+		}
+
+		// Same Column Move
+		else if(colDistance == 0){
+			// Current < Goal
+			if(current_tile.row < goal_tile.row){
+				for(i = 0; i <= rowDistance; i++){
+					// At current_tile: count = 0
+					if(i == 0){
+						this.board[current_tile.row + i][current_tile.column].setCount(0);
+						continue;
+					}
+					// At goal_tile: count = remaining pcs
+					else if(i == rowDistance){
+						this.board[current_tile.row + i][current_tile.column].setCount(count);
+					}
+					// At a tile in between: count = i, update
+					else{
+						this.board[current_tile.row + i][current_tile.column].setCount(i)
+						count = count - i;
+					}
+				}
+
+			}
+			// Current > Goal
+			else{
+				for(i = 0; i <= rowDistance; i++){
+					// At current_tile: count = 0
+					if(i == 0){
+						this.board[current_tile.row - i][curret_tile.column].setCount(0);
+						continue;
+					}
+					// At goal_tile: count = reamining pcs
+					else if(i == rowDistance){
+						this.board[current_tile.row - i][current_tile.column].setCount(count);
+					}
+					// At atile in between: count = i, update
+					else{
+						this.board[current_tile.row - i][current_tile.column].setCount(i);
+						count = count - i;
+					}
+				}
+			}
+		}
 	}
 
 
