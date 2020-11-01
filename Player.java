@@ -213,7 +213,8 @@ private class Player
 	 * @param	goal_tile	The tile the Player wishes to move to
 	 * @return	none		Updates board, no return
 	 */
-	public Move(Tile current_tile, Tile goal_tile){
+	public void Move(Player player, Tile current_tile, Tile goal_tile)
+	{
 		int count, rowDistance, colDistance;
 
 		rowDistance = abs(current_tile.row - goal_tile.row);
@@ -223,9 +224,9 @@ private class Player
 		count = current_tile.getCount();
 
 		// Diagonal Move - stuck			
-		if(rowDistance == colDistance){
+		//if(rowDistance == colDistance){
 			// 
-		}
+		//}
 
 		// Same Row Move
 		else if(rowDistance == 0){
@@ -247,7 +248,7 @@ private class Player
 					}
 					// At a tile in between: count = i, update
 					else{
-						this.board[current_tile.row][current_tile.column + i].setCount(i)
+						this.board[current_tile.row][current_tile.column + i].setCount(i);
 						this.board[current_tile.row][current_tile.column + i].setColor(player.getColor());
 						player.addTile(this.board[current_tile.row][current_tile.column + i]);
 						count = count - i;
@@ -302,7 +303,7 @@ private class Player
 					}
 					// At a tile in between: count = i, update
 					else{
-						this.board[current_tile.row + i][current_tile.column].setCount(i)
+						this.board[current_tile.row + i][current_tile.column].setCount(i);
 						this.board[current_tile.row + i][current_tile.column].setColor(player.getColor());
 						player.addTile(this.board[current_tile.row + i][current_tile.column]);
 						count = count - i;
@@ -337,7 +338,7 @@ private class Player
 			}
 		}
 	}
-
+}
 
 
 
