@@ -28,6 +28,14 @@ private class Player
 		return this.occupiedTiles;
 	}
 
+	public void removeTile(Tile tile){
+		this.occupiedTiles.Remove(tile);
+	}
+
+	public void addTile(Tile tile){
+		this.occupiedTiles.Add(tile);
+	}
+
 
 	/* Returns True if move is determined Valid, False if Illegal
 	 * If this method returns True, the subsequent Move method is called
@@ -227,15 +235,21 @@ private class Player
 					// At current_tile: count = 0
 					if(i == 0){
 						this.board[current_tile.row][current_tile.column + i].setCount(0);
+						this.board[current_tile.row][current_tile.column + i].setColor(null);
+						player.removeTile(this.board[current_tile.row][current_tile.column + i]);
 						continue;
 					}
 					// At goal_tile: count = remaining pcs
 					else if(i == colDistance){
 						this.board[current_tile.row][current_tile.column + i].setCount(count);
+						this.board[current_tile.row][current_tile.column + i].setColor(player.getColor());
+						player.addTile(this.board[current_tile.row][current_tile.column + i]);
 					}
 					// At a tile in between: count = i, update
 					else{
 						this.board[current_tile.row][current_tile.column + i].setCount(i)
+						this.board[current_tile.row][current_tile.column + i].setColor(player.getColor());
+						player.addTile(this.board[current_tile.row][current_tile.column + i]);
 						count = count - i;
 					}
 				}
@@ -247,15 +261,21 @@ private class Player
 					// At current_tile: count = 0
 					if(i == 0){
 						this.board[current_tile.row][curret_tile.column - i].setCount(0);
+						this.board[current_tile.row][current_tile.column - i].setColor(null);
+						player.removeTile(this.board[current_tile.row][current_tile.column - i]);
 						continue;
 					}
 					// At goal_tile: count = reamining pcs
 					else if(i == colDistance){
 						this.board[current_tile.row][current_tile.column - i].setCount(count);
+						this.board[current_tile.row][current_tile.column - i].setColor(player.getColor());
+						player.addTile(this.board[current_tile.row][current_tile.column - i]);
 					}
 					// At atile in between: count = i, update
 					else{
 						this.board[current_tile.row][current_tile.column - i].setCount(i);
+						this.board[current_tile.row][current_tile.column - i].setColor(player.getColor());
+						player.addTile(this.board[current_tile.row][current_tile.column - i]);
 						count = count - i;
 					}
 				}
@@ -270,15 +290,21 @@ private class Player
 					// At current_tile: count = 0
 					if(i == 0){
 						this.board[current_tile.row + i][current_tile.column].setCount(0);
+						this.board[current_tile.row + i][current_tile.column].setColor(null);
+						player.removeTile(this.board[current_tile.row + i][current_tile.column]);
 						continue;
 					}
 					// At goal_tile: count = remaining pcs
 					else if(i == rowDistance){
 						this.board[current_tile.row + i][current_tile.column].setCount(count);
+						this.board[current_tile.row + i][current_tile.column].setColor(player.getColor());
+						player.addTile(this.board[current_tile.row + i][current_tile.column]);
 					}
 					// At a tile in between: count = i, update
 					else{
 						this.board[current_tile.row + i][current_tile.column].setCount(i)
+						this.board[current_tile.row + i][current_tile.column].setColor(player.getColor());
+						player.addTile(this.board[current_tile.row + i][current_tile.column]);
 						count = count - i;
 					}
 				}
@@ -290,15 +316,21 @@ private class Player
 					// At current_tile: count = 0
 					if(i == 0){
 						this.board[current_tile.row - i][curret_tile.column].setCount(0);
+						this.board[current_tile.row - i][current_tile.column].setColor(null);
+						player.removeTile(this.board[current_tile.row - i][current_tile.column]);
 						continue;
 					}
 					// At goal_tile: count = reamining pcs
 					else if(i == rowDistance){
 						this.board[current_tile.row - i][current_tile.column].setCount(count);
+						this.board[current_tile.row - i][current_tile.column].setColor(player.getColor());
+						player.addTile(this.board[current_tile.row - i][current_tile.column]);
 					}
 					// At atile in between: count = i, update
 					else{
 						this.board[current_tile.row - i][current_tile.column].setCount(i);
+						this.board[current_tile.row - i][current_tile.column].setColor(player.getColor());
+						player.addTile(this.board[current_tile.row - i][current_tile.column]);
 						count = count - i;
 					}
 				}
