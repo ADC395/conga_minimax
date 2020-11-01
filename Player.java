@@ -50,14 +50,14 @@ private class Player
 		int distance, required;
 	
 		// Check if goal tile is empty or of same color
-		if((goal_tile.getColor() == null) or (goal_tile.getColor() == player.getColor())){
+		if((goal_tile.getColor() == null) || (goal_tile.getColor() == player.getColor())){
 		
 		}else{
 			return false;
 		}
 
 		// Check same row
-		if((current_tile.row == goal_tile.row){
+		if(current_tile.row == goal_tile.row){
 			// Same row & column (cannot move to same tile)
 			if(current_tile.column == goal_tile.column){
 				return false;
@@ -105,7 +105,7 @@ private class Player
 		}
 
 		// Check same column
-		else if((current_tile.column == goal_tile.column){
+		else if(current_tile.column == goal_tile.column){
 			// Same column & row (cannot move to same tile)
 			if(current_tile.row == goal_tile.row){
 				return false;
@@ -149,7 +149,9 @@ private class Player
 				}
 
 				return true;
+			}
 		}
+	
 
 		// Check same diagonal - not correct
 		/*
