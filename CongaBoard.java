@@ -1,5 +1,8 @@
 import java.util.Arrays;
 
+/*
+ * Conga Board Implementation.
+ */
 class CongaBoard {
     // Default rows, columns & pieces
     int rows = 4;
@@ -7,6 +10,7 @@ class CongaBoard {
     int pieces = 10;
     Tile[][] board;
 
+    /* Move class */
     enum Move {
         INVALID,
         ROW,
@@ -14,10 +18,12 @@ class CongaBoard {
         DIAGONAL
     }
 
+    /* Default CongaBoard constructor */
     public CongaBoard() {
         this.initializeBoard();
     }
 
+    /* Constructor override */
     public CongaBoard(int rows, int columns, int pieces) {
         this.rows = rows;
         this.columns = columns;
@@ -26,17 +32,19 @@ class CongaBoard {
         this.initializeBoard();
     }
 
+    /* Initialize board for the game. It generates first state of the game. */
     private void initializeBoard() {
         Player player1;
         Player player2;
         this.board = new Tile[this.rows][this.columns];
+        // Initialize board
         for (int row=0; row < this.rows; row++) {
             for (int col=0; col <this.columns; col++) {
                 int[] id = {row, col};
                 this.board[row][col] = new Tile(id);
             }
         }
-        // Put players in the board
+        // Initialize and put players on the board
         player1 = new Player(Color.BLACK, this.board[0][0].getId());
         this.board[0][0].setCount(10);
         this.board[0][0].setPlayer(player1);
@@ -45,6 +53,14 @@ class CongaBoard {
         this.board[this.rows-1][this.columns-1].setPlayer(player2);
     }
 
+    /*
+     * move pieces from currentTile to goalTile if move is valid / possible.
+     *
+     * @param   currentTile (Tile): Tile you are currently on
+     * @param   goalTile (Tile): Tile you want to move to
+     *
+     * @return  Move: Type of move made
+     */
     public Move move(Tile currentTile, Tile goalTile) {
         Move moveType = this.checkMove(currentTile, goalTile);
         if (moveType == Move.INVALID) {
@@ -57,6 +73,15 @@ class CongaBoard {
 
     }
 
+    /*
+     * Make move from currentTile to goalTile
+     *
+     * @param   currentTile: Tile you are currently on
+     * @param   goalTile: Your goal tile
+     * @param   moveType: Type of move to be made from currentTile to goalTile
+     * @param   moveCount: Step made so far, starts from 0
+     *
+     */
     private void moveToGoal(Tile currentTile, Tile goalTile, Move moveType, int moveCount) {
         Player currentPlayer = currentTile.getPlayer();
         if (currentTile == goalTile) {
@@ -78,7 +103,15 @@ class CongaBoard {
         }
     }
 
-
+    /*
+     * Make the move to next tile
+     *
+     * @param   currentTile: Tile you are currently on
+     * @param   goalTile: Goal Tile
+     * @param   moveCount: move made so far in current turn
+     *
+     * @return Next tile
+     */
     private Tile moveToNextTile(Tile currentTile, Tile goalTile, Move moveType, int moveCount) {
         Tile nextTile = getNextTile(currentTile, goalTile, moveType);
         // TODO: logic about the move: what if we have pieces already do we carry them along
@@ -88,7 +121,15 @@ class CongaBoard {
         return nextTile;
     }
 
-
+    /*
+     * Get next tile needed to move form currentTile to goalTile
+     *
+     * @param   currentTile: Tile you are currently on
+     * @param   goalTile: Tile you want to move to
+     * @param   moveType: Type of move you are making
+     *
+     * @return  next Tile
+     */
     private Tile getNextTile(Tile currentTile, Tile goalTile, Move moveType) {
         Tile nextTile;
         int currentRow, currentCol, goalRow, goalCol;
@@ -97,6 +138,7 @@ class CongaBoard {
         goalRow = goalTile.getId()[0];
         goalCol = goalTile.getId()[1];
 
+        // Next tile will be determined by the type of move we are making
         switch (moveType) {
             case ROW:
                 // move along row
@@ -134,7 +176,14 @@ class CongaBoard {
         return nextTile;
     }
 
-
+    /*
+     * Check if a move can be made from currentTile to goalTile
+     *
+     * @param   currentTile (Tile): Tile you are currently on
+     * @param   goalTile (Tile): Tile you want to move to
+     *
+     * @return  Type of move that can be made
+     */
     private Move checkMove(Tile currentTile, Tile goalTile) {
         int distance = -1;
         Move moveType = null;
@@ -145,7 +194,7 @@ class CongaBoard {
         Player pC = currentTile.getPlayer();
         Player pG = goalTile.getPlayer();
 
-        // Check if rows and columns are valid
+        // check if rows and columns are valid for currentTile and goalTile
         if (currentRow > this.rows || currentCol > this.columns || goalRow > this.rows || goalCol > this.columns ||
                 currentRow < 0 || currentCol < 0 || goalRow < 0 || goalCol < 0) {
             return Move.INVALID;
@@ -155,30 +204,28 @@ class CongaBoard {
             return Move.INVALID;
         }
 
-        // Make moves
-        // Row moves
+        // Check for row move
         if (currentRow == goalRow) {
-            // Check if you have enough pieces to make the move
             distance = Math.abs(currentCol - goalCol);
             moveType =  Move.ROW;
-        // Column moves
+        // Check for column move
         } else if (currentCol == goalCol) {
             distance = Math.abs(currentRow - goalRow);
             moveType = Move.COLUMN;
-        // Diagonal moves
-        } else if (Math.abs(currentRow - goalRow) == Math.abs(currentCol - goalCol)){
+        // Check for diagonal move
+        } else if (Math.abs(currentRow - goalRow) == Math.abs(currentCol - goalCol)) {
             distance = Math.abs(currentRow - goalRow);
             moveType = Move.DIAGONAL;
         }
-        // invalid move or not enough pieces to move
-        if (moveType == null ||currentTile.getCount() < this.getMinimumPieces(distance)) {
+        // Check if valid move can be made
+        if (moveType == null || currentTile.getCount() < this.getMinimumPieces(distance)) {
             return Move.INVALID;
         }
 
         // Check if there is another player in between current tile and goal tile
         Tile tempTile = currentTile;
         while (tempTile != goalTile) {
-            tempTile = this.getNextTile(currentTile, goalTile, moveType);
+            tempTile = this.getNextTile(tempTile, goalTile, moveType);
             if (tempTile.getPlayer() != null) {
                 if (tempTile.getPlayer().getColor() != currentTile.getPlayer().getColor()) {
                     return Move.INVALID;
@@ -188,15 +235,47 @@ class CongaBoard {
         return moveType;
     }
 
-
+    /*
+     * Get minimum amount of pieces required to make move
+     *
+     * @param   distance: Distance need to move
+     *
+     * @return  number of pieces required to make move
+     */
     private int getMinimumPieces(int distance) {
         if (distance == -1) {
             return Integer.MAX_VALUE;
         }
-        // Algorithm to calculate minimum number of pieces required to move
-        // Sum of n numbers = n(n+1) / 2
-        // Sum of n-1 numbers = n(n-1) / 2
-        // Minimum required number of pieces to make move = (n(n-1) / 2) + 1
+        /* Algorithm to calculate minimum number of pieces required to move
+         * Sum of n numbers = n(n+1) / 2
+         * Sum of n-1 numbers = n(n-1) / 2
+         * Minimum required number of pieces to make move = (n(n-1) / 2) + 1
+         */
         return ((distance * (distance-1) / 2) + 1);
+    }
+
+    /*
+     * Print current board
+     */
+    public void printBoard() {
+        System.out.println("_________________________");
+        for (int row = 0;row < this.rows; row++) {
+            for (int col=0; col < this.columns; col++) {
+                Tile currentTile = this.board[row][col];
+                // Width of tile is 6
+                if (col == 0) {
+                    System.out.print("|");
+                }
+                if (currentTile.getPlayer() == null) {
+                    System.out.printf("%6s", "|");
+                } else if (currentTile.getPlayer().getColor() == Color.BLACK) {
+                    System.out.print(String.format("%4d",currentTile.getCount()) + "B|");
+                } else {
+                    System.out.print(String.format("%4d",currentTile.getCount()) + "W|");
+                }
+            }
+            System.out.println();
+        }
+        System.out.println("_________________________");
     }
 }
