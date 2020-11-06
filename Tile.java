@@ -1,11 +1,14 @@
 import java.util.Arrays;
-import java.util.List;
 
+/*
+ * Tile implementation for Conga Board
+ */
 class Tile {
     private Player player;
     private int count;
     private final int[]  id;
 
+    /* Constructor */
     Tile(int[] id) {
         // id = [row, col]
         this.id = id;
@@ -33,8 +36,9 @@ class Tile {
         return  this.id;
     }
 
-    // Tile equality
+
     @Override
+    /* Check if two tiles are equal */
     public boolean equals(Object obj) {
         // Check for null
         if (obj == null) {
