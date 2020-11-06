@@ -5,7 +5,7 @@ import java.util.Arrays;
  */
 class CongaBoard {
     // Default rows, columns & pieces
-    int rows = 4;
+    public int rows = 4;
     int columns = 4;
     int pieces = 10;
     Tile[][] board;
@@ -45,10 +45,10 @@ class CongaBoard {
             }
         }
         // Initialize and put players on the board
-        player1 = new Player(Color.BLACK, this.board[0][0].getId());
+        player1 = new Player(Color.WHITE, this.board[0][0].getId());
         this.board[0][0].setCount(10);
         this.board[0][0].setPlayer(player1);
-        player2 = new Player(Color.WHITE, this.board[this.rows-1][this.columns-1].getId());
+        player2 = new Player(Color.BLACK, this.board[this.rows-1][this.columns-1].getId());
         this.board[this.rows-1][this.columns-1].setCount(10);
         this.board[this.rows-1][this.columns-1].setPlayer(player2);
     }
@@ -184,7 +184,7 @@ class CongaBoard {
      *
      * @return  Type of move that can be made
      */
-    private Move checkMove(Tile currentTile, Tile goalTile) {
+    public Move checkMove(Tile currentTile, Tile goalTile) {
         int distance = -1;
         Move moveType = null;
         int currentRow = currentTile.getId()[0];
