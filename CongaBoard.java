@@ -8,6 +8,7 @@ class CongaBoard {
     int rows = 4;
     int columns = 4;
     int pieces = 10;
+    Tile temp;
     Tile[][] board;
 
     /* Move class */
@@ -84,12 +85,16 @@ class CongaBoard {
      */
     private void moveToGoal(Tile currentTile, Tile goalTile, Move moveType, int moveCount) {
         Player currentPlayer = currentTile.getPlayer();
+
         if (currentTile == goalTile) {
-            System.out.println("Moved from " + Arrays.toString(currentTile.getId()) + " to " +
+            System.out.println();
+            System.out.println("Moved from " + Arrays.toString(this.temp.getId()) + " to " +
                     Arrays.toString(goalTile.getId()));
+            this.temp = null;
         } else {
             Tile nextTile = this.moveToNextTile(currentTile, goalTile, moveType, moveCount);
             if (moveCount == 0) {
+                this.temp = currentTile;
                 currentTile.setCount(0);
                 currentTile.setPlayer(null);
                 currentPlayer.removeTile(currentTile.getId());
@@ -258,8 +263,9 @@ class CongaBoard {
      * Print current board
      */
     public void printBoard() {
-        System.out.println("_________________________");
+        //System.out.println();
         for (int row = 0;row < this.rows; row++) {
+            System.out.println("_________________________");
             for (int col=0; col < this.columns; col++) {
                 Tile currentTile = this.board[row][col];
                 // Width of tile is 6

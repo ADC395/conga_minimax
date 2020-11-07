@@ -29,7 +29,7 @@ public class Main {
         congaBoard.printBoard();
         // goal state
         //TODO: Implement win condition
-        congaBoard.move(board[1][2], board[2][2]);
+        congaBoard.move(board[1][2], board[2][3]);
         congaBoard.printBoard();
     }
 }
