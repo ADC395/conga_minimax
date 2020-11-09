@@ -29,8 +29,8 @@ class CongaBoard {
     private void initializeBoard() {
         this.board = new Tile[this.rows][this.columns];
         // Initialize board
-        for (int row=0; row < this.rows; row++) {
-            for (int col=0; col <this.columns; col++) {
+        for (int row = 0; row < this.rows; row++) {
+            for (int col = 0; col < this.columns; col++) {
                 int[] id = {row, col};
                 this.board[row][col] = new Tile(id);
             }
@@ -58,6 +58,21 @@ class CongaBoard {
     }
 
     /*
+     * move pieces from currentTile to goalTile if you already know move type
+     * and know that the move is valid
+     *
+     * @param   currentTile (Tile): Tile you are currently on
+     * @param   goalTile (Tile): Tile you want to move to
+     * @param   (Move)
+     * @return  Move: Type of move made
+     */
+    public void move(Tile currentTile, Tile goalTile, Move move) {
+        this.moveToGoal(currentTile, goalTile, currentTile, move, 0);
+
+    }
+
+
+    /*
      * Make move from currentTile to goalTile
      *
      * @param   currentTile: Tile you are currently on
@@ -66,7 +81,7 @@ class CongaBoard {
      * @param   moveCount: Step made so far, starts from 0
      * @param   startingTile: Tile you are started the move from
      */
-    private void moveToGoal(Tile currentTile, Tile goalTile,Tile startingTile, Move moveType, int moveCount) {
+    private void moveToGoal(Tile currentTile, Tile goalTile, Tile startingTile, Move moveType, int moveCount) {
         Player currentPlayer = currentTile.getPlayer();
 
         if (currentTile == goalTile) {
@@ -117,7 +132,7 @@ class CongaBoard {
      *
      * @return  next Tile
      */
-    private Tile getNextTile(Tile currentTile, Tile goalTile, Move moveType) {
+    public Tile getNextTile(Tile currentTile, Tile goalTile, Move moveType) {
         Tile nextTile;
         int currentRow, currentCol, goalRow, goalCol;
         currentRow = currentTile.getId()[0];
@@ -130,32 +145,32 @@ class CongaBoard {
             case ROW:
                 // move along row
                 if (currentCol < goalCol) {
-                    nextTile = this.board[currentRow][currentCol+1];
+                    nextTile = this.board[currentRow][currentCol + 1];
                 } else {
-                    nextTile = this.board[currentRow][currentCol-1];
+                    nextTile = this.board[currentRow][currentCol - 1];
                 }
                 break;
             case COLUMN:
                 // move along column
                 if (currentRow < goalRow) {
-                    nextTile = this.board[currentRow+1][currentCol];
+                    nextTile = this.board[currentRow + 1][currentCol];
                 } else {
-                    nextTile = this.board[currentRow-1][currentCol];
+                    nextTile = this.board[currentRow - 1][currentCol];
                 }
                 break;
             default:
                 // move along diagonal
                 if (currentCol < goalCol) {
                     if (currentRow < goalRow) {
-                        nextTile = this.board[currentRow+1][currentCol+1];
+                        nextTile = this.board[currentRow + 1][currentCol + 1];
                     } else {
-                        nextTile = this.board[currentRow-1][currentCol+1];
+                        nextTile = this.board[currentRow - 1][currentCol + 1];
                     }
                 } else {
                     if (currentRow < goalRow) {
-                        nextTile = this.board[currentRow+1][currentCol-1];
+                        nextTile = this.board[currentRow + 1][currentCol - 1];
                     } else {
-                        nextTile = this.board[currentRow-1][currentCol-1];
+                        nextTile = this.board[currentRow - 1][currentCol - 1];
                     }
                 }
                 break;
@@ -171,7 +186,7 @@ class CongaBoard {
      *
      * @return  Type of move that can be made
      */
-    private Move checkMove(Tile currentTile, Tile goalTile) {
+    public Move checkMove(Tile currentTile, Tile goalTile) {
         int distance = -1;
         Move moveType = null;
         int currentRow = currentTile.getId()[0];
@@ -187,19 +202,19 @@ class CongaBoard {
             return Move.INVALID;
         }
         // Check if player at current tile can move to goal tile
-        if ( pC == null || (pG != null && pC.getColor() != pG.getColor())) {
+        if (pC == null || (pG != null && pC.getColor() != pG.getColor())) {
             return Move.INVALID;
         }
 
         // Check for row move
         if (currentRow == goalRow) {
             distance = Math.abs(currentCol - goalCol);
-            moveType =  Move.ROW;
-        // Check for column move
+            moveType = Move.ROW;
+            // Check for column move
         } else if (currentCol == goalCol) {
             distance = Math.abs(currentRow - goalRow);
             moveType = Move.COLUMN;
-        // Check for diagonal move
+            // Check for diagonal move
         } else if (Math.abs(currentRow - goalRow) == Math.abs(currentCol - goalCol)) {
             distance = Math.abs(currentRow - goalRow);
             moveType = Move.DIAGONAL;
@@ -238,18 +253,18 @@ class CongaBoard {
          * Sum of n-1 numbers = n(n-1) / 2
          * Minimum required number of pieces to make move = (n(n-1) / 2) + 1
          */
-        return ((distance * (distance-1) / 2) + 1);
+        return ((distance * (distance - 1) / 2) + 1);
     }
 
     /*
      * Print current board
      */
-    public void printBoard() {
+    public static void printBoard(CongaBoard congaBoard) {
         //System.out.println();
-        for (int row = 0;row < this.rows; row++) {
+        for (int row = 0; row < congaBoard.rows; row++) {
             System.out.println("_________________________");
-            for (int col=0; col < this.columns; col++) {
-                Tile currentTile = this.board[row][col];
+            for (int col = 0; col < congaBoard.columns; col++) {
+                Tile currentTile = congaBoard.board[row][col];
                 // Width of tile is 6
                 if (col == 0) {
                     System.out.print("|");
@@ -257,20 +272,13 @@ class CongaBoard {
                 if (currentTile.getPlayer() == null) {
                     System.out.printf("%6s", "|");
                 } else if (currentTile.getPlayer().getColor() == Color.BLACK) {
-                    System.out.print(String.format("%4d",currentTile.getCount()) + "B|");
+                    System.out.print(String.format("%4d", currentTile.getCount()) + "B|");
                 } else {
-                    System.out.print(String.format("%4d",currentTile.getCount()) + "W|");
+                    System.out.print(String.format("%4d", currentTile.getCount()) + "W|");
                 }
             }
             System.out.println();
         }
         System.out.println("_________________________");
-    }
-
-    /*
-     * Start player movement
-     */
-    public Tile[][] makeMove(Player player) {
-        Helper. getNextStates(this.board, player);
     }
 }
