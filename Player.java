@@ -9,7 +9,7 @@ import java.lang.*;
  */
 class Player {
 
-	private final ArrayList<int[]> occupiedTiles;
+	private ArrayList<int[]> occupiedTiles;
 	private final Color color;
 
 

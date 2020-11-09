@@ -7,6 +7,7 @@ class Tile {
     private Player player;
     private int count;
     private final int[]  id;
+    private String tileName;
 
     /* Constructor */
     Tile(int[] id) {
@@ -14,6 +15,9 @@ class Tile {
         this.id = id;
         this.player = null;
         this.count = 0;
+        // Tile name = Tile + "Player's color initial" + tile id
+        // Tile name will act as key if we store Tile in a dictionary
+        this.tileName = "tile";
     }
 
     public Player getPlayer() {
@@ -22,10 +26,15 @@ class Tile {
 
     public void setPlayer(Player player) {
         this.player = player;
+        if (player == null) {
+            this.tileName = "tile";
+        } else {
+            this.tileName = "tile" + player.getColor().toString().charAt(0) + Arrays.toString(id);
+        }
     }
 
     public int getCount() {
-        return  this.count;
+        return this.count;
     }
 
     public void setCount(int count) {
@@ -33,10 +42,16 @@ class Tile {
     }
 
     public int[] getId() {
-        return  this.id;
+        return this.id;
     }
 
+    public String getTileName() {
+        return this.tileName;
+    }
 
+    private void setTileName(String newTileName) {
+        this.tileName = newTileName;
+    }
     @Override
     /* Check if two tiles are equal */
     public boolean equals(Object obj) {
@@ -49,7 +64,7 @@ class Tile {
             return false;
         }
         final Tile other = (Tile) obj;
-        return Arrays.equals(this.id, other.getId()) && this.player.equals(other.player);
+        return this.tileName.equals(other.getTileName());
     }
 
 }

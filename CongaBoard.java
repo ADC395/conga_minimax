@@ -11,14 +11,6 @@ class CongaBoard {
     Tile temp;
     Tile[][] board;
 
-    /* Move class */
-    enum Move {
-        INVALID,
-        ROW,
-        COLUMN,
-        DIAGONAL
-    }
-
     /* Default CongaBoard constructor */
     public CongaBoard() {
         this.initializeBoard();
@@ -35,8 +27,6 @@ class CongaBoard {
 
     /* Initialize board for the game. It generates first state of the game. */
     private void initializeBoard() {
-        Player player1;
-        Player player2;
         this.board = new Tile[this.rows][this.columns];
         // Initialize board
         for (int row=0; row < this.rows; row++) {
@@ -45,13 +35,6 @@ class CongaBoard {
                 this.board[row][col] = new Tile(id);
             }
         }
-        // Initialize and put players on the board
-        player1 = new Player(Color.BLACK, this.board[0][0].getId());
-        this.board[0][0].setCount(10);
-        this.board[0][0].setPlayer(player1);
-        player2 = new Player(Color.WHITE, this.board[this.rows-1][this.columns-1].getId());
-        this.board[this.rows-1][this.columns-1].setCount(10);
-        this.board[this.rows-1][this.columns-1].setPlayer(player2);
     }
 
     /*
@@ -68,7 +51,7 @@ class CongaBoard {
             System.out.println("Cannot make move from " + Arrays.toString(currentTile.getId()) + " to " +
                     Arrays.toString(goalTile.getId()));
         } else {
-            this.moveToGoal(currentTile, goalTile, moveType, 0);
+            this.moveToGoal(currentTile, goalTile, currentTile, moveType, 0);
         }
         return moveType;
 
@@ -81,14 +64,13 @@ class CongaBoard {
      * @param   goalTile: Your goal tile
      * @param   moveType: Type of move to be made from currentTile to goalTile
      * @param   moveCount: Step made so far, starts from 0
-     *
+     * @param   startingTile: Tile you are started the move from
      */
-    private void moveToGoal(Tile currentTile, Tile goalTile, Move moveType, int moveCount) {
+    private void moveToGoal(Tile currentTile, Tile goalTile,Tile startingTile, Move moveType, int moveCount) {
         Player currentPlayer = currentTile.getPlayer();
 
         if (currentTile == goalTile) {
-            System.out.println();
-            System.out.println("Moved from " + Arrays.toString(this.temp.getId()) + " to " +
+            System.out.println("Moved from " + Arrays.toString(startingTile.getId()) + " to " +
                     Arrays.toString(goalTile.getId()));
             this.temp = null;
         } else {
@@ -104,7 +86,7 @@ class CongaBoard {
             }
             currentPlayer.addTile(nextTile.getId());
             moveCount++;
-            this.moveToGoal(nextTile, goalTile, moveType, moveCount);
+            this.moveToGoal(nextTile, goalTile, startingTile, moveType, moveCount);
         }
     }
 
@@ -115,7 +97,7 @@ class CongaBoard {
      * @param   goalTile: Goal Tile
      * @param   moveCount: move made so far in current turn
      *
-     * @return Next tile
+     * @return  Next tile
      */
     private Tile moveToNextTile(Tile currentTile, Tile goalTile, Move moveType, int moveCount) {
         Tile nextTile = getNextTile(currentTile, goalTile, moveType);
@@ -283,5 +265,12 @@ class CongaBoard {
             System.out.println();
         }
         System.out.println("_________________________");
+    }
+
+    /*
+     * Start player movement
+     */
+    public Tile[][] makeMove(Player player) {
+        Helper. getNextStates(this.board, player);
     }
 }

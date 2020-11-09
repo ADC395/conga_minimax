@@ -1,5 +1,5 @@
 /* Player Color Class */
-enum Color{
+enum Color {
 	BLACK,
 	WHITE;
 }
