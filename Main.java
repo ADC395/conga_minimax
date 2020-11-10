@@ -23,20 +23,16 @@ public class Main {
         currentPlayer = rand.nextBoolean() ? player1 : player2;
         int tempCount = 0;
         while (true) {
-            System.out.println(player1.getColor());
-            congaBoard.board[0][1].setPlayer(player2);
-//          Helper.getNextStates(congaBoard, currentPlayer);
-            Helper.getNextStates(congaBoard, player1);
+            System.out.println(currentPlayer.getColor());
+            Helper.getNextStates(congaBoard, currentPlayer);
             // change player
             if (currentPlayer == player1) {
                 currentPlayer = player2;
             } else {
                 currentPlayer = player1;
             }
-            CongaBoard.printBoard(congaBoard);
-            System.out.println(congaBoard.board[0][1].getPlayer().getColor());
 
-            if (tempCount == 0) {
+            if (tempCount == 1) {
                 return;
             }
             if (Helper.evaluateBoard(congaBoard) == Integer.MAX_VALUE) {
@@ -46,6 +42,8 @@ public class Main {
                 System.out.println("Player BlACK won!");
                 break;
             }
+            System.out.println("--------------------------------");
+            tempCount++;
         }
     }
 }

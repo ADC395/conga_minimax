@@ -3,7 +3,7 @@ import java.util.Arrays;
 /*
  * Tile implementation for Conga Board
  */
-class Tile {
+class Tile extends Object implements Cloneable {
     private Player player;
     private int count;
     private final int[]  id;
@@ -29,7 +29,7 @@ class Tile {
         if (player == null) {
             this.tileName = "tile";
         } else {
-            this.tileName = "tile" + player.getColor().toString().charAt(0) + Arrays.toString(id);
+            this.tileName = "tile" + player.getColor().toString().charAt(0) + id[0] + id[1];
         }
     }
 
@@ -67,4 +67,13 @@ class Tile {
         return this.tileName.equals(other.getTileName());
     }
 
+    /* Overriding clone() method of Object class */
+    public Object clone () throws CloneNotSupportedException {
+        Tile tile = new Tile(this.id);
+        tile.player = this.player;
+        tile.count = this.count;
+        tile.tileName = this.tileName;
+
+        return tile;
+    }
 }

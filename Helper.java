@@ -44,36 +44,56 @@ public class Helper {
         }
     }
 
-    static void getNextStates(CongaBoard congaBoard, Player currentPlayer) {
+    static ArrayList<CongaBoard> getNextStates(CongaBoard congaBoard, Player currentPlayer) {
         // check every tile
         // if tile has the player color, generate states from that tile
         // do that for every tile
-        Tile[][][] nextStates;
-        ArrayList<int[]> moveIndices = new ArrayList<>();
-        int[] currentIndex;
+
+        ArrayList<CongaBoard> nextStates = new ArrayList<>();
+        MovesInfo movesInfo = new MovesInfo();
+        int[] currentIndex = new int[2];
+
         for (int row = 0; row < congaBoard.rows; row++) {
             for (int col = 0; col < congaBoard.columns; col++) {
-                currentIndex = new int[] {row, col};
+                currentIndex = new int[]{row, col};
                 if (congaBoard.board[row][col].getPlayer() != null
-                    && congaBoard.board[row][col].getPlayer().equals(currentPlayer)) {
+                        && congaBoard.board[row][col].getPlayer().equals(currentPlayer)) {
                     // passing rows as size so that it works in boards not set to default size of 4
-                    moveIndices.addAll(getPossibleIndices(congaBoard, currentIndex, congaBoard.rows));
-                    // make the new moves
-                    // add the states
-                    // return the states
+                    movesInfo = getPossibleIndices(congaBoard, currentIndex, congaBoard.rows);
                 }
             }
         }
-        System.out.println("-----------------------------------------");
-        for (int[] i: moveIndices) {
-            System.out.println(Arrays.toString(i));
+        // make the new moves
+        // add the states
+        // return the states
+        for (int i = 0; i < movesInfo.moveType.size(); i++) {
+            CongaBoard newCongaBoard;
+
+            try {
+                newCongaBoard = (CongaBoard) congaBoard.clone();
+            } catch (CloneNotSupportedException e) {
+                return null;
+            }
+
+            System.out.println(newCongaBoard.board[0][0].getCount());
+
+            Tile currentTile = newCongaBoard.board[movesInfo.startIndices.get(i)[0]][movesInfo.startIndices.get(i)[1]];
+            Tile goalTile = newCongaBoard.board[movesInfo.goalIndices.get(i)[0]][movesInfo.goalIndices.get(i)[1]];
+            Move move = movesInfo.moveType.get(i);
+
+            newCongaBoard.move(currentTile, goalTile, move);
+            nextStates.add(newCongaBoard);
         }
+        for (CongaBoard board: nextStates) {
+            CongaBoard.printBoard(board);
+        }
+        return  nextStates;
     }
 
-    private static ArrayList<int[]> getPossibleIndices(CongaBoard congaBoard, int[] currentIndex, int size) {
+    private static MovesInfo getPossibleIndices(CongaBoard congaBoard, int[] currentIndex, int size) {
+        MovesInfo movesInfo = new MovesInfo();
         // valid move types: row, diagonal, column
         int addRow, addCol, subRow, subCol;
-        ArrayList<int[]> indices = new ArrayList<>();
         int[] goalIndex;
 
         for (int col = 1; col < size; col++) {
@@ -82,12 +102,14 @@ public class Helper {
             // row move (+)
             goalIndex = new int[] {currentIndex[0], addCol};
             if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.ROW)) {
-                indices.add(goalIndex);
+                movesInfo.add(currentIndex, goalIndex, Move.ROW);
+
             }
             // row move (-)
             goalIndex = new int[] {currentIndex[0], subCol};
             if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.ROW)) {
-                indices.add(goalIndex);
+                movesInfo.add(currentIndex, goalIndex, Move.ROW);
+
             }
         }
 
@@ -98,12 +120,14 @@ public class Helper {
             // column move (+)
             goalIndex = new int[] {addRow, currentIndex[1]};
             if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.COLUMN)) {
-                indices.add(goalIndex);
+                movesInfo.add(currentIndex, goalIndex, Move.COLUMN);
+
             }
             // column move (-)
             goalIndex = new int[] {subRow, currentIndex[1]};
             if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.COLUMN)) {
-                indices.add(goalIndex);
+                movesInfo.add(currentIndex, goalIndex, Move.COLUMN);
+
             }
         }
 
@@ -116,25 +140,28 @@ public class Helper {
             // diagonal move (+) (+)
             goalIndex = new int[] {addDiagRow, addDiagCol};
             if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.DIAGONAL)) {
-                indices.add(goalIndex);
+                movesInfo.add(currentIndex, goalIndex, Move.DIAGONAL);
+
             }
             // diagonal move (-) (-)
             goalIndex = new int[] {subDiagRow, subDiagCol};
             if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.DIAGONAL)) {
-                indices.add(goalIndex);
+                movesInfo.add(currentIndex, goalIndex, Move.DIAGONAL);
+
             }
             // diagonal move (+) (-)
             goalIndex = new int[] {addDiagRow, subDiagCol};
             if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.DIAGONAL)) {
-                indices.add(goalIndex);
+                movesInfo.add(currentIndex, goalIndex, Move.DIAGONAL);
+
             }
             // diagonal move (-) (+)
             goalIndex = new int[] {subDiagRow, addDiagCol};
             if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.DIAGONAL)) {
-                indices.add(goalIndex);
+                movesInfo.add(currentIndex, goalIndex, Move.DIAGONAL);
             }
         }
-        return indices;
+        return movesInfo;
     }
 
     // Check if the index is valid
@@ -188,4 +215,20 @@ public class Helper {
 
 }
 
+class MovesInfo {
+    ArrayList<int[]> goalIndices;
+    ArrayList<Move> moveType;
+    ArrayList<int[]> startIndices;
+    MovesInfo() {
+        this.startIndices = new ArrayList<>();
+        this.goalIndices = new ArrayList<>();
+        this.moveType = new ArrayList<>();
+    }
+
+    public void add(int[] startIndex, int[] goalIndex, Move move) {
+        this.startIndices.add(startIndex);
+        this.goalIndices.add(goalIndex);
+        this.moveType.add(move);
+    }
+}
 // TODO: use player occupied tile to make efficient

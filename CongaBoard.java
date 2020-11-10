@@ -3,18 +3,18 @@ import java.util.Arrays;
 /*
  * Conga Board Implementation.
  */
-class CongaBoard {
+class CongaBoard implements Cloneable{
     // Default rows, columns & pieces
     int rows = 4;
     int columns = 4;
     int pieces = 10;
-    Tile temp;
     Tile[][] board;
 
     /* Default CongaBoard constructor */
     public CongaBoard() {
         this.initializeBoard();
     }
+
 
     /* Constructor override */
     public CongaBoard(int rows, int columns, int pieces) {
@@ -23,6 +23,17 @@ class CongaBoard {
         this.pieces = pieces;
 
         this.initializeBoard();
+    }
+
+    /* Overriding clone() method of Object class */
+    public Object clone () throws CloneNotSupportedException {
+        CongaBoard newCongaBoard = new CongaBoard(this.rows, this.columns, this.pieces);
+        for(int row = 0; row < this.rows; row++ ) {
+            for(int column = 0; column < this.columns; column++) {
+                newCongaBoard.board[row][column] = (Tile) board[row][column].clone();
+            }
+        }
+        return newCongaBoard;
     }
 
     /* Initialize board for the game. It generates first state of the game. */
@@ -68,7 +79,6 @@ class CongaBoard {
      */
     public void move(Tile currentTile, Tile goalTile, Move move) {
         this.moveToGoal(currentTile, goalTile, currentTile, move, 0);
-
     }
 
 
@@ -83,15 +93,12 @@ class CongaBoard {
      */
     private void moveToGoal(Tile currentTile, Tile goalTile, Tile startingTile, Move moveType, int moveCount) {
         Player currentPlayer = currentTile.getPlayer();
-
         if (currentTile == goalTile) {
             System.out.println("Moved from " + Arrays.toString(startingTile.getId()) + " to " +
                     Arrays.toString(goalTile.getId()));
-            this.temp = null;
         } else {
             Tile nextTile = this.moveToNextTile(currentTile, goalTile, moveType, moveCount);
             if (moveCount == 0) {
-                this.temp = currentTile;
                 currentTile.setCount(0);
                 currentTile.setPlayer(null);
                 currentPlayer.removeTile(currentTile.getId());
@@ -115,6 +122,11 @@ class CongaBoard {
      * @return  Next tile
      */
     private Tile moveToNextTile(Tile currentTile, Tile goalTile, Move moveType, int moveCount) {
+//        System.out.println(Arrays.toString(currentTile.getId()));
+//        System.out.println(Arrays.toString(goalTile.getId()));
+//        System.out.println(moveType);
+//        System.out.println(moveCount);
+
         Tile nextTile = getNextTile(currentTile, goalTile, moveType);
         // TODO: logic about the move: what if we have pieces already do we carry them along
         nextTile.setCount(nextTile.getCount() + currentTile.getCount() - moveCount);
@@ -281,4 +293,7 @@ class CongaBoard {
         }
         System.out.println("_________________________");
     }
+
+    // Cone the CongaBoard
+
 }
