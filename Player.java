@@ -1,5 +1,4 @@
-import java.util.*;
-import java.lang.*;
+import java.util.ArrayList;
 
 /* A player is an agent who can perform a move on the board
  * Each player is designated a color and has a list of occupied tiles
@@ -9,39 +8,43 @@ import java.lang.*;
  */
 class Player {
 
-	private ArrayList<int[]> occupiedTiles;
+	private final ArrayList<Tile> occupiedTiles;
 	private final Color color;
 
-
-	//Constructor
-	Player(Color color, int[] tileId) {
+	// Constructor
+	Player(Color color) {
 		this.occupiedTiles = new ArrayList<>();
 		this.color = color;
-		this.occupiedTiles.add(tileId);
 	}
 
 	public Color getColor() {
 		return this.color;
 	}
 
-	public ArrayList<int[]> getOccupiedTiles() {
-		return this.occupiedTiles;
-	}
-
-	public void removeTile(int[] tile){
-		// TODO: make this check better
-		// Don't add duplicates
-		for (int[] id : this.occupiedTiles) {
-			if (Arrays.equals(id, tile)) {
+	/*
+	 * Add tile to the list of occupied tiles
+	 *
+	 * @param	tile: tile to be added to the occupied tile list
+	 */
+	public void addTile(Tile tile) {
+		// Replace the tile if it is already in the list
+		for(int i = 0; i < this.occupiedTiles.size(); i++) {
+			if (this.occupiedTiles.get(i).equals(tile)) {
+				this.occupiedTiles.set(i, tile);
 				return;
 			}
 		}
-		this.occupiedTiles.remove(tile);
+		this.occupiedTiles.add(tile);
 	}
 
-	public void addTile(int[] tileId) {
-
-		this.occupiedTiles.add(tileId);
+	/*
+	 * Remove a tile from the occupied tiles list
+	 *
+	 * @param	tile: tile to be removed from the list
+	 */
+	public void removeTile(Tile tile){
+		// TODO: check if this function is working
+		this.occupiedTiles.removeIf(t -> t.equals(tile));
 	}
 
 	@Override
@@ -57,6 +60,13 @@ class Player {
 		final Player other = (Player) obj;
 		// TODO: implement check for occupiedTiles
 		return this.color == other.getColor();
+	}
+
+	/*
+	 * Get the list of occupied tiles
+	 */
+	public ArrayList<Tile> getTiles() {
+		return this.occupiedTiles;
 	}
 }
 

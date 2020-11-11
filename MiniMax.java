@@ -10,6 +10,10 @@ class MiniMax {
        // do the minimax with alpha beta pruning
        // return most newIndex, optimal board state
     }
+
+//    public static void getNextState(CongaBoard congaBoard, Player player) {
+//       Tile[][][] states;
+//    }
 }
 
 
