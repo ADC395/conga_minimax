@@ -1,34 +1,33 @@
-import java.util.Random;
-
+/*
+ * Main class
+ */
 public class Main {
     public static void main(String[] args) {
         CongaBoard congaBoard;
-        Tile[][] board;
         Player player1;
         Player player2;
-        Player turn;
+        Player currentPlayer;
 
-        congaBoard = new CongaBoard();
-        board = congaBoard.board;
-        // Initialize and put players on the first and last tile on the board
-        player1 = new Player(Color.WHITE, congaBoard.board[0][0].getId());
-        congaBoard.board[0][0].setCount(10);
-        congaBoard.board[0][0].setPlayer(player1);
-        player2 = new Player(Color.BLACK, congaBoard.board[congaBoard.rows-1][congaBoard.columns-1].getId());
-        congaBoard.board[congaBoard.rows-1][congaBoard.columns-1].setCount(10);
-        congaBoard.board[congaBoard.rows-1][congaBoard.columns-1].setPlayer(player2);
-
-        Random rand = new Random();
-        turn = rand.nextBoolean() ? player1 : player2;
+        player1 = new Player(Color.WHITE);
+        player2 = new Player(Color.BLACK);
+        // randomize starting player
+        currentPlayer = (int)(Math.random() * 10) % 2 == 0 ? player1 : player2;
+        // Initialize the Conga board
+        congaBoard = new CongaBoard(4, 4, 10, new Player[] {player1, player2});
+        congaBoard.setBoardValue(currentPlayer);
+        // TODO: Stop game if it is not finished after certain time
+        int temp = 0;
         while (true) {
-            congaBoard.board = congaBoard.makeMove(turn);
-            // change player
-            if (turn == player1) {
-                turn = player2;
-            } else {
-                turn = player1;
+            System.out.println("Current turn: " + currentPlayer.getColor());
+            System.out.println("Current board state: ");
+            CongaBoard.printBoard(congaBoard);
+            Helper.getNextStates(congaBoard, currentPlayer);
+            if (temp == 1) {
+                break;
             }
-            congaBoard.printBoard();
+            temp++;
+            // change player
+            currentPlayer = currentPlayer == player1 ? player2 : player1;
 
             if (Helper.evaluateBoard(congaBoard) == Integer.MAX_VALUE) {
                 System.out.println("Player WHITE won!");
@@ -37,22 +36,7 @@ public class Main {
                 System.out.println("Player BlACK won!");
                 break;
             }
+            System.out.println("----------------------------------------------------------------");
         }
     }
 }
-
-// What to do in this situation
-//        congaBoard.move(board[0][0], board[0][3]);
-//                congaBoard.printBoard();
-//                congaBoard.move(board[0][3], board[2][3]);
-//                congaBoard.printBoard();
-//                congaBoard.move(board[0][2], board[1][2]);
-//                congaBoard.printBoard();
-//                congaBoard.move(board[2][3], board[2][2]);
-//                congaBoard.printBoard();
-//                congaBoard.move(board[1][3], board[2][3]);
-//                congaBoard.printBoard();
-//                congaBoard.move(board[2][2], board[3][2]);
-//                congaBoard.printBoard();
-//                congaBoard.move(board[1][2], board[2][2]);
-//                congaBoard.printBoard();

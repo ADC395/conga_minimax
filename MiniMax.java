@@ -52,6 +52,10 @@ class MiniMax {
 	       return bestScore;
        }
     }
+
+//    public static void getNextState(CongaBoard congaBoard, Player player) {
+//       Tile[][][] states;
+//    }
 }
 
 
