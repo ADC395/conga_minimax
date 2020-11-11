@@ -8,7 +8,7 @@ class CongaBoard {
     private final int pieces;
     private final Player[] players;
     private Tile[][] board;
-    // boardValue is an unique identifier for every state of the board
+    // boardValue is a unique identifier for every state of the board
     private String boardValue;
 
     /* Constructor */
