@@ -1,7 +1,7 @@
 class MiniMax {
    int test;
   
-   /* This function computes the MiniMax value for a node of the Tree of states
+   /* This function computes the MiniMax value for a node in the Tree of states
     * and implements alpha-beta pruning
     *
     * @params	node	Root node of game Tree of possible states
