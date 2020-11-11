@@ -1,39 +1,24 @@
-import java.util.Arrays;
-
 /*
  * Conga Board Implementation.
  */
-class CongaBoard implements Cloneable{
+class CongaBoard {
     // Default rows, columns & pieces
-    int rows = 4;
-    int columns = 4;
-    int pieces = 10;
-    Tile[][] board;
+    private final int rows;
+    private final int columns;
+    private final int pieces;
+    private final Player[] players;
+    private Tile[][] board;
+    // boardValue is an unique identifier for every state of the board
+    private String boardValue;
 
-    /* Default CongaBoard constructor */
-    public CongaBoard() {
-        this.initializeBoard();
-    }
-
-
-    /* Constructor override */
-    public CongaBoard(int rows, int columns, int pieces) {
+    /* Constructor */
+    public CongaBoard(int rows, int columns, int pieces, Player[] players) {
         this.rows = rows;
         this.columns = columns;
         this.pieces = pieces;
-
+        this.players = players;
+        // initialize board
         this.initializeBoard();
-    }
-
-    /* Overriding clone() method of Object class */
-    public Object clone () throws CloneNotSupportedException {
-        CongaBoard newCongaBoard = new CongaBoard(this.rows, this.columns, this.pieces);
-        for(int row = 0; row < this.rows; row++ ) {
-            for(int column = 0; column < this.columns; column++) {
-                newCongaBoard.board[row][column] = (Tile) board[row][column].clone();
-            }
-        }
-        return newCongaBoard;
     }
 
     /* Initialize board for the game. It generates first state of the game. */
@@ -46,109 +31,104 @@ class CongaBoard implements Cloneable{
                 this.board[row][col] = new Tile(id);
             }
         }
+        // Put players on the board
+        this.board[0][0].setPlayer(this.players[0]);
+        this.board[this.rows-1][this.columns-1].setPlayer(this.players[1]);
+        // Add player pieces
+        this.board[0][0].setCount(10);
+        this.board[this.rows-1][this.columns-1].setCount(10);
+        // Add the tiles to player's occupied tiles list
+        this.players[0].addTile(this.board[0][0]);
+        this.players[1].addTile(this.board[this.rows-1][this.columns-1]);
+    }
+
+    /* Make a hard copy of the board */
+    public CongaBoard cloneBoard() {
+        CongaBoard newCongaBoard = new CongaBoard(this.rows, this.columns, this.pieces, this.players);
+        for(int row = 0; row < this.rows; row++ ) {
+            for(int column = 0; column < this.columns; column++) {
+                newCongaBoard.board[row][column] = this.board[row][column].cloneTile();
+            }
+        }
+        return newCongaBoard;
     }
 
     /*
-     * move pieces from currentTile to goalTile if move is valid / possible.
+     * Initialize move from startTile to goalTile.
+     * Will be used if we have a human player.
      *
-     * @param   currentTile (Tile): Tile you are currently on
-     * @param   goalTile (Tile): Tile you want to move to
+     * @param   startTile: Tile you are currently on
+     * @param   goalTile: Tile you want to move to
      *
-     * @return  Move: Type of move made
+     * @return  Type of move made
      */
-    public Move move(Tile currentTile, Tile goalTile) {
-        Move moveType = this.checkMove(currentTile, goalTile);
+    public Move humanMove(Tile startTile, Tile goalTile) {
+        Move moveType = this.checkMove(startTile, goalTile, null);
         if (moveType == Move.INVALID) {
-            System.out.println("Cannot make move from " + Arrays.toString(currentTile.getId()) + " to " +
-                    Arrays.toString(goalTile.getId()));
+            return Move.INVALID;
         } else {
-            this.moveToGoal(currentTile, goalTile, currentTile, moveType, 0);
+            this.moveToGoal(startTile, goalTile, startTile, moveType, 0);
         }
         return moveType;
 
     }
 
     /*
-     * move pieces from currentTile to goalTile if you already know move type
+     * Initialize move from startTile to goalTile if you already know move type
      * and know that the move is valid
      *
-     * @param   currentTile (Tile): Tile you are currently on
-     * @param   goalTile (Tile): Tile you want to move to
-     * @param   (Move)
-     * @return  Move: Type of move made
+     * @param   startTile: Tile you are currently on
+     * @param   goalTile: Tile you want to move to
+     * @param   move: Type of move to be made
      */
-    public void move(Tile currentTile, Tile goalTile, Move move) {
-        this.moveToGoal(currentTile, goalTile, currentTile, move, 0);
+    public void move(Tile startTile, Tile goalTile, Move move) {
+        this.moveToGoal(startTile, goalTile, startTile, move, 0);
     }
 
 
     /*
-     * Make move from currentTile to goalTile
+     * Start moving towards goal tile from start tile
      *
-     * @param   currentTile: Tile you are currently on
+     * @param   startTile: Tile you are starting to move from
      * @param   goalTile: Your goal tile
+     * @param   currentTile: Tile you are currently on
      * @param   moveType: Type of move to be made from currentTile to goalTile
      * @param   moveCount: Step made so far, starts from 0
-     * @param   startingTile: Tile you are started the move from
      */
-    private void moveToGoal(Tile currentTile, Tile goalTile, Tile startingTile, Move moveType, int moveCount) {
-        Player currentPlayer = currentTile.getPlayer();
-        if (currentTile == goalTile) {
-            System.out.println("Moved from " + Arrays.toString(startingTile.getId()) + " to " +
-                    Arrays.toString(goalTile.getId()));
-        } else {
-            Tile nextTile = this.moveToNextTile(currentTile, goalTile, moveType, moveCount);
-            if (moveCount == 0) {
-                currentTile.setCount(0);
-                currentTile.setPlayer(null);
-                currentPlayer.removeTile(currentTile.getId());
-            }
-            if (nextTile.getPlayer() == null) {
-                nextTile.setPlayer(currentPlayer);
-            }
-            currentPlayer.addTile(nextTile.getId());
-            moveCount++;
-            this.moveToGoal(nextTile, goalTile, startingTile, moveType, moveCount);
-        }
-    }
-
-    /*
-     * Make the move to next tile
-     *
-     * @param   currentTile: Tile you are currently on
-     * @param   goalTile: Goal Tile
-     * @param   moveCount: move made so far in current turn
-     *
-     * @return  Next tile
-     */
-    private Tile moveToNextTile(Tile currentTile, Tile goalTile, Move moveType, int moveCount) {
-//        System.out.println(Arrays.toString(currentTile.getId()));
-//        System.out.println(Arrays.toString(goalTile.getId()));
-//        System.out.println(moveType);
-//        System.out.println(moveCount);
-
-        Tile nextTile = getNextTile(currentTile, goalTile, moveType);
+    private void moveToGoal(Tile startTile, Tile goalTile, Tile currentTile, Move moveType, int moveCount) {
         // TODO: logic about the move: what if we have pieces already do we carry them along
+        // TODO: set the board name when moving
+        if (currentTile == goalTile) {
+            startTile.getPlayer().removeTile(startTile);
+            startTile.removePlayer();
+            startTile.setCount(0);
+            return;
+        }
+        Tile nextTile = this.getNextTile(currentTile, goalTile, moveType);
+        nextTile.setPlayer(startTile.getPlayer());
         nextTile.setCount(nextTile.getCount() + currentTile.getCount() - moveCount);
-        currentTile.setCount(moveCount);
 
-        return nextTile;
+        currentTile.setCount(moveCount);
+        startTile.getPlayer().addTile(nextTile);
+        moveCount++;
+
+        this.moveToGoal(startTile, goalTile, nextTile, moveType, moveCount);
     }
 
     /*
-     * Get next tile needed to move form currentTile to goalTile
+     * Get next tile needed to move form startTile to goalTile
      *
-     * @param   currentTile: Tile you are currently on
+     * @param   startTile: Tile you are currently on
      * @param   goalTile: Tile you want to move to
      * @param   moveType: Type of move you are making
      *
      * @return  next Tile
      */
-    public Tile getNextTile(Tile currentTile, Tile goalTile, Move moveType) {
+    public Tile getNextTile(Tile startTile, Tile goalTile, Move moveType) {
         Tile nextTile;
-        int currentRow, currentCol, goalRow, goalCol;
-        currentRow = currentTile.getId()[0];
-        currentCol = currentTile.getId()[1];
+        int startRow, startCol, goalRow, goalCol;
+        startRow = startTile.getId()[0];
+        startCol = startTile.getId()[1];
         goalRow = goalTile.getId()[0];
         goalCol = goalTile.getId()[1];
 
@@ -156,33 +136,33 @@ class CongaBoard implements Cloneable{
         switch (moveType) {
             case ROW:
                 // move along row
-                if (currentCol < goalCol) {
-                    nextTile = this.board[currentRow][currentCol + 1];
+                if (startCol < goalCol) {
+                    nextTile = this.board[startRow][startCol + 1];
                 } else {
-                    nextTile = this.board[currentRow][currentCol - 1];
+                    nextTile = this.board[startRow][startCol - 1];
                 }
                 break;
             case COLUMN:
                 // move along column
-                if (currentRow < goalRow) {
-                    nextTile = this.board[currentRow + 1][currentCol];
+                if (startRow < goalRow) {
+                    nextTile = this.board[startRow + 1][startCol];
                 } else {
-                    nextTile = this.board[currentRow - 1][currentCol];
+                    nextTile = this.board[startRow - 1][startCol];
                 }
                 break;
             default:
                 // move along diagonal
-                if (currentCol < goalCol) {
-                    if (currentRow < goalRow) {
-                        nextTile = this.board[currentRow + 1][currentCol + 1];
+                if (startCol < goalCol) {
+                    if (startRow < goalRow) {
+                        nextTile = this.board[startRow + 1][startCol + 1];
                     } else {
-                        nextTile = this.board[currentRow - 1][currentCol + 1];
+                        nextTile = this.board[startRow - 1][startCol + 1];
                     }
                 } else {
-                    if (currentRow < goalRow) {
-                        nextTile = this.board[currentRow + 1][currentCol - 1];
+                    if (startRow < goalRow) {
+                        nextTile = this.board[startRow + 1][startCol - 1];
                     } else {
-                        nextTile = this.board[currentRow - 1][currentCol - 1];
+                        nextTile = this.board[startRow - 1][startCol - 1];
                     }
                 }
                 break;
@@ -191,57 +171,64 @@ class CongaBoard implements Cloneable{
     }
 
     /*
-     * Check if a move can be made from currentTile to goalTile
+     * Check if a move can be made from startTile to goalTile
      *
-     * @param   currentTile (Tile): Tile you are currently on
-     * @param   goalTile (Tile): Tile you want to move to
+     * @param   startTile: Tile you are currently on
+     * @param   goalTile: Tile you want to move to
+     * @param   move: type of move to be made, can be null
      *
      * @return  Type of move that can be made
      */
-    public Move checkMove(Tile currentTile, Tile goalTile) {
+    public Move checkMove(Tile startTile, Tile goalTile, Move move) {
         int distance = -1;
         Move moveType = null;
-        int currentRow = currentTile.getId()[0];
-        int currentCol = currentTile.getId()[1];
+        int startRow = startTile.getId()[0];
+        int startCol = startTile.getId()[1];
         int goalRow = goalTile.getId()[0];
         int goalCol = goalTile.getId()[1];
-        Player pC = currentTile.getPlayer();
+        Player pC = startTile.getPlayer();
         Player pG = goalTile.getPlayer();
 
-        // check if rows and columns are valid for currentTile and goalTile
-        if (currentRow > this.rows || currentCol > this.columns || goalRow > this.rows || goalCol > this.columns ||
-                currentRow < 0 || currentCol < 0 || goalRow < 0 || goalCol < 0) {
-            return Move.INVALID;
-        }
         // Check if player at current tile can move to goal tile
         if (pC == null || (pG != null && pC.getColor() != pG.getColor())) {
             return Move.INVALID;
         }
 
-        // Check for row move
-        if (currentRow == goalRow) {
-            distance = Math.abs(currentCol - goalCol);
-            moveType = Move.ROW;
-            // Check for column move
-        } else if (currentCol == goalCol) {
-            distance = Math.abs(currentRow - goalRow);
-            moveType = Move.COLUMN;
-            // Check for diagonal move
-        } else if (Math.abs(currentRow - goalRow) == Math.abs(currentCol - goalCol)) {
-            distance = Math.abs(currentRow - goalRow);
-            moveType = Move.DIAGONAL;
+        // if move is null than it will try to determine valid move type that can be made
+        if (move !=  null) {
+            distance = switch (move) {
+                case ROW, DIAGONAL -> Math.abs(startCol - goalCol);
+                case COLUMN -> Math.abs(startRow - goalRow);
+                default -> 0;
+            };
+            moveType = move;
+        } else {
+            // Check for row move
+            if (startRow == goalRow) {
+                distance = Math.abs(startCol - goalCol);
+                moveType = Move.ROW;
+                // Check for column move
+            } else if (startCol == goalCol) {
+                distance = Math.abs(startRow - goalRow);
+                moveType = Move.COLUMN;
+                // Check for diagonal move
+            } else if (Math.abs(startRow - goalRow) == Math.abs(startCol - goalCol)) {
+                distance = Math.abs(startRow - goalRow);
+                moveType = Move.DIAGONAL;
+            }
         }
-        // Check if valid move can be made
-        if (moveType == null || currentTile.getCount() < this.getMinimumPieces(distance)) {
+
+        // Check if we have enough pieces to make the move
+        if (moveType == null || startTile.getCount() < this.getMinimumPieces(distance)) {
             return Move.INVALID;
         }
 
         // Check if there is another player in between current tile and goal tile
-        Tile tempTile = currentTile;
-        while (tempTile != goalTile) {
-            tempTile = this.getNextTile(tempTile, goalTile, moveType);
-            if (tempTile.getPlayer() != null) {
-                if (tempTile.getPlayer().getColor() != currentTile.getPlayer().getColor()) {
+        Tile currentTile = startTile;
+        while (currentTile != goalTile) {
+            currentTile = this.getNextTile(currentTile, goalTile, moveType);
+            if (currentTile.getPlayer() != null) {
+                if (currentTile.getPlayer().getColor() != startTile.getPlayer().getColor()) {
                     return Move.INVALID;
                 }
             }
@@ -250,7 +237,7 @@ class CongaBoard implements Cloneable{
     }
 
     /*
-     * Get minimum amount of pieces required to make move
+     * Get minimum amount of pieces required to make a move in conga board
      *
      * @param   distance: Distance need to move
      *
@@ -272,7 +259,6 @@ class CongaBoard implements Cloneable{
      * Print current board
      */
     public static void printBoard(CongaBoard congaBoard) {
-        //System.out.println();
         for (int row = 0; row < congaBoard.rows; row++) {
             System.out.println("_________________________");
             for (int col = 0; col < congaBoard.columns; col++) {
@@ -294,6 +280,44 @@ class CongaBoard implements Cloneable{
         System.out.println("_________________________");
     }
 
-    // Cone the CongaBoard
+    /* Set board value. Board value also depends on which player has the current state
+     *
+     * @param player: Player who has the current turn
+     */
+    public void setBoardValue(Player player) {
+        // board value = currentPlayerColor + [playerOccupiedTile + tile's id.....]
+        StringBuilder tempS = new StringBuilder();
+        tempS.append(player.getColor().toString().charAt(0));
+        this.boardValue = player.getColor().toString();
+        for (int row = 0; row < this.rows; row++) {
+            for (int col = 0; col < this.columns; col++) {
+                if (this.board[row][col].getPlayer() != null) {
+                    tempS.append(row);
+                    tempS.append(col);
+                    tempS.append(this.board[row][col].getPlayer().getColor().toString().charAt(0));
+                }
+            }
+        }
+        this.boardValue = tempS.toString();
+    }
 
+    /* Get board value */
+    public String getBoardValue() {
+        return this.boardValue;
+    }
+
+    /* Get number of rows in the board */
+    public int getRows() {
+        return rows;
+    }
+
+    /* Get number of columns in the board */
+    public int getColumns() {
+        return columns;
+    }
+
+    /* Get the board */
+    public Tile[][] getBoard() {
+        return board;
+    }
 }

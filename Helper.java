@@ -1,18 +1,17 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Stream;
 
+// TODO: loop detection, plan is to pass along Arraylist of boardState string
 public class Helper {
     /*
      * Static evaluator of the CongaBoard
-     * @param   (CongaBoard) congaBoard
-     * @return  (int) evaluation value of the board
+     *
+     * @param   congaBoard
+     *
+     * @return  evaluation value of the board
      */
     static int evaluateBoard(CongaBoard congaBoard) {
-        Tile[][] board = congaBoard.board;
+        Tile[][] board = congaBoard.getBoard();
         // evalIndex contains all the possible index of neighbors relative to current tile
         int[][] relativeNeighborIndex = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
         int whiteMove = 0;
@@ -21,7 +20,7 @@ public class Helper {
             for (int col = 0; col < 4; col++) {
                 for (int[] index: relativeNeighborIndex) {
                     try {
-                        if (congaBoard.checkMove(board[row][col], board[row+index[0]][col+index[1]]) != Move.INVALID) {
+                        if (congaBoard.checkMove(board[row][col], board[row+index[0]][col+index[1]], null) != Move.INVALID) {
                             if (board[row][col].getPlayer().getColor() == Color.BLACK) {
                                 blackMove++;
                             } else {
@@ -44,187 +43,162 @@ public class Helper {
         }
     }
 
+    /*
+     * Get the list of children states from current Conga board state
+     *
+     * @param   congaBoard: current congaBoard State
+     * @param   currentPlayer: player who has the current turn
+     *
+     * @return  list of children states
+     */
     static ArrayList<CongaBoard> getNextStates(CongaBoard congaBoard, Player currentPlayer) {
-        // check every tile
-        // if tile has the player color, generate states from that tile
-        // do that for every tile
-
         ArrayList<CongaBoard> nextStates = new ArrayList<>();
+        Tile[][] board = congaBoard.getBoard();
         MovesInfo movesInfo = new MovesInfo();
-        int[] currentIndex = new int[2];
+        Tile currentTile;
 
-        for (int row = 0; row < congaBoard.rows; row++) {
-            for (int col = 0; col < congaBoard.columns; col++) {
-                currentIndex = new int[]{row, col};
-                if (congaBoard.board[row][col].getPlayer() != null
-                        && congaBoard.board[row][col].getPlayer().equals(currentPlayer)) {
-                    // passing rows as size so that it works in boards not set to default size of 4
-                    movesInfo = getPossibleIndices(congaBoard, currentIndex, congaBoard.rows);
+        // Get all the possible moves that current player can make in current board state
+        for (int row = 0; row < congaBoard.getRows(); row++) {
+            for (int col = 0; col < congaBoard.getColumns(); col++) {
+                currentTile = board[row][col];
+                if (currentTile.getPlayer() != null && currentTile.getPlayer().equals(currentPlayer)) {
+                    movesInfo = getPossibleMoves(congaBoard, currentTile);
+                    // For every possible move, create a clone of current board state and make move on the cloned board.
+                    for (int i = 0; i < movesInfo.moveType.size(); i++) {
+                        CongaBoard newCongaBoard = congaBoard.cloneBoard();
+                        Tile [][] newBoard = newCongaBoard.getBoard();
+
+                        currentTile = newBoard[movesInfo.startIndices.get(i)[0]][movesInfo.startIndices.get(i)[1]];
+                        Tile goalTile = newBoard[movesInfo.goalIndices.get(i)[0]][movesInfo.goalIndices.get(i)[1]];
+
+                        Move move = movesInfo.moveType.get(i);
+                        newCongaBoard.move(currentTile, goalTile, move);
+                        nextStates.add(newCongaBoard);
+                    }
                 }
             }
         }
-        // make the new moves
-        // add the states
-        // return the states
-        for (int i = 0; i < movesInfo.moveType.size(); i++) {
-            CongaBoard newCongaBoard;
 
-            try {
-                newCongaBoard = (CongaBoard) congaBoard.clone();
-            } catch (CloneNotSupportedException e) {
-                return null;
-            }
-
-            System.out.println(newCongaBoard.board[0][0].getCount());
-
-            Tile currentTile = newCongaBoard.board[movesInfo.startIndices.get(i)[0]][movesInfo.startIndices.get(i)[1]];
-            Tile goalTile = newCongaBoard.board[movesInfo.goalIndices.get(i)[0]][movesInfo.goalIndices.get(i)[1]];
-            Move move = movesInfo.moveType.get(i);
-
-            newCongaBoard.move(currentTile, goalTile, move);
-            nextStates.add(newCongaBoard);
+        System.out.println("Possible states: ");
+        System.out.println("Possible states size: " + nextStates.size());
+        // print all the possible states
+        for (CongaBoard b: nextStates) {
+            CongaBoard.printBoard(b);
         }
-        for (CongaBoard board: nextStates) {
-            CongaBoard.printBoard(board);
-        }
-        return  nextStates;
+        return nextStates;
     }
 
-    private static MovesInfo getPossibleIndices(CongaBoard congaBoard, int[] currentIndex, int size) {
+    /*
+     * Get all the possible moves and move info from a tile in the board
+     *
+     * @param   congaBoard: current Conga board
+     * @param   currentTile: tile you are currently on
+     *
+     * @return  information about the possible moves
+     */
+    private static MovesInfo getPossibleMoves(CongaBoard congaBoard, Tile currentTile) {
         MovesInfo movesInfo = new MovesInfo();
-        // valid move types: row, diagonal, column
-        int addRow, addCol, subRow, subCol;
-        int[] goalIndex;
+        Tile[][] board = congaBoard.getBoard();
+        int[] currentIndex = currentTile.getId();
+        int rowSize = congaBoard.getRows();
+        int colSize = congaBoard.getColumns();
+        int diagSize = Math.min(rowSize, colSize);
+        Tile goalTile;
 
-        for (int col = 1; col < size; col++) {
-            addCol = currentIndex[1] + col;
-            subCol = currentIndex[1] - col;
-            // row move (+)
-            goalIndex = new int[] {currentIndex[0], addCol};
-            if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.ROW)) {
-                movesInfo.add(currentIndex, goalIndex, Move.ROW);
-
-            }
-            // row move (-)
-            goalIndex = new int[] {currentIndex[0], subCol};
-            if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.ROW)) {
-                movesInfo.add(currentIndex, goalIndex, Move.ROW);
-
-            }
-        }
-
-        for (int row = 1; row < size; row++) {
-            addRow = currentIndex[0] + row;
-            subRow = currentIndex[0] - row;
-
-            // column move (+)
-            goalIndex = new int[] {addRow, currentIndex[1]};
-            if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.COLUMN)) {
-                movesInfo.add(currentIndex, goalIndex, Move.COLUMN);
-
-            }
-            // column move (-)
-            goalIndex = new int[] {subRow, currentIndex[1]};
-            if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.COLUMN)) {
-                movesInfo.add(currentIndex, goalIndex, Move.COLUMN);
-
+        // Moves along the row, change column
+        for (int col = 1; col < colSize; col++) {
+            // Moves along the row towards right (+column)
+            // Moves along the row towards left (-column)
+            int[] newColumns = new int[] {currentIndex[1] + col, currentIndex[1] - col};
+            for (int newCol: newColumns) {
+                // check if the new index is valid
+                if (isValidIndex(congaBoard, currentIndex[0], newCol)) {
+                    goalTile = board[currentIndex[0]][newCol];
+                    // check if the move to goal tile is valid
+                    if (congaBoard.checkMove(currentTile, goalTile, Move.ROW) != Move.INVALID) {
+                        movesInfo.add(currentIndex, goalTile.getId(), Move.ROW);
+                    }
+                }
             }
         }
-
-        for (int diag = 1; diag < size; diag++) {
-            int addDiagRow = currentIndex[0] + diag;
-            int addDiagCol = currentIndex[1] + diag;
-            int subDiagRow = currentIndex[0] - diag;
-            int subDiagCol = currentIndex[1] - diag;
-
-            // diagonal move (+) (+)
-            goalIndex = new int[] {addDiagRow, addDiagCol};
-            if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.DIAGONAL)) {
-                movesInfo.add(currentIndex, goalIndex, Move.DIAGONAL);
-
+        // Moves along the column, change row
+        for (int row = 1; row < rowSize; row++) {
+            // Moves along the column towards bottom (+row)
+            // Moves along the column towards top (-row)
+            int[] newRows = new int[] {currentIndex[0] + row, currentIndex[0] - row};
+            for (int newRow: newRows) {
+                // check if the new index is valid
+                if (isValidIndex(congaBoard, newRow, currentIndex[1])) {
+                    goalTile = board[newRow][currentIndex[1]];
+                    // check if the move to goal tile is valid
+                    if (congaBoard.checkMove(currentTile, goalTile, Move.COLUMN) != Move.INVALID) {
+                        movesInfo.add(currentIndex, goalTile.getId(), Move.COLUMN);
+                    }
+                }
             }
-            // diagonal move (-) (-)
-            goalIndex = new int[] {subDiagRow, subDiagCol};
-            if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.DIAGONAL)) {
-                movesInfo.add(currentIndex, goalIndex, Move.DIAGONAL);
-
-            }
-            // diagonal move (+) (-)
-            goalIndex = new int[] {addDiagRow, subDiagCol};
-            if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.DIAGONAL)) {
-                movesInfo.add(currentIndex, goalIndex, Move.DIAGONAL);
-
-            }
-            // diagonal move (-) (+)
-            goalIndex = new int[] {subDiagRow, addDiagCol};
-            if (checkTiles(congaBoard, currentIndex, goalIndex, size, Move.DIAGONAL)) {
-                movesInfo.add(currentIndex, goalIndex, Move.DIAGONAL);
+        }
+        // Moves along the diagonal, change both row and column
+        for (int diag = 1; diag < diagSize; diag++) {
+            // Moves along the column towards bottom, along the row towards right (+row, +column)
+            // Moves along the column towards bottom, along the row towards left (+row, -column)
+            // Moves along the column towards top, along the row towards right (-row, +column)
+            // Moves along the column towards top, along the row towards left (-row, -column)
+            int[][] newDiagonals = new int[][] {
+                    {currentIndex[0] + diag, currentIndex[1] + diag},
+                    {currentIndex[0] + diag, currentIndex[1] - diag},
+                    {currentIndex[0] - diag, currentIndex[1] + diag},
+                    {currentIndex[0] - diag, currentIndex[1] - diag},
+            };
+            for (int[] newDiag: newDiagonals) {
+                // check if the new index is valid
+                if (isValidIndex(congaBoard,newDiag[0], newDiag[1])) {
+                    goalTile = board[newDiag[0]][newDiag[1]];
+                    // check if the move to goal tile is valid
+                    if (congaBoard.checkMove(currentTile, goalTile, Move.DIAGONAL) != Move.INVALID) {
+                        movesInfo.add(currentIndex, goalTile.getId(), Move.DIAGONAL);
+                    }
+                }
             }
         }
         return movesInfo;
     }
 
-    // Check if the index is valid
-    private static boolean checkTiles(CongaBoard congaBoard, int[] currentIndex, int[] goalIndex, int size, Move move) {
-        // check if index is valid
-        if (currentIndex[0] >= size || currentIndex[0] < 0 || goalIndex[0] >= size || goalIndex[0] < 0
-            || currentIndex[1] >= size || currentIndex[1] < 0 || goalIndex[1] >= size || goalIndex[1] < 0) {
-            return false;
-        }
-        Tile currentTile = congaBoard.board[currentIndex[0]][currentIndex[1]];
-        Tile goalTile = congaBoard.board[goalIndex[0]][goalIndex[1]];
-        Tile tempTile = currentTile;
-
-        int distance = switch (move) {
-            case ROW, DIAGONAL -> Math.abs(currentIndex[1] - goalIndex[1]);
-            case COLUMN -> Math.abs(currentIndex[0] - goalIndex[0]);
-            default -> 0;
-        };
-        // check if you have enough pieces to make move
-        if (currentTile.getCount() < getMinimumPieces(distance)) {
-            return  false;
-        }
-        // check if there is any other between goal and current tile
-        while (tempTile != goalTile) {
-            tempTile = congaBoard.getNextTile(tempTile, goalTile, move);
-            if (tempTile.getPlayer() != null && tempTile.getPlayer().getColor() != currentTile.getPlayer().getColor()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     /*
-     * Get minimum amount of pieces required to make move
+     * check if the index is valid on the Conga board
      *
-     * @param   distance: Distance need to move
+     * @param   congBoard: Conga board
+     * @param   rowIndex: row index value
+     * @param   colIndex: column index value
      *
-     * @return  number of pieces required to make move
+     * @return  true, if indices are valid. false, otherwise
      */
-    private static int getMinimumPieces(int distance) {
-        if (distance == -1) {
-            return Integer.MAX_VALUE;
-        }
-        /* Algorithm to calculate minimum number of pieces required to move
-         * Sum of n numbers = n(n+1) / 2
-         * Sum of n-1 numbers = n(n-1) / 2
-         * Minimum required number of pieces to make move = (n(n-1) / 2) + 1
-         */
-        return ((distance * (distance - 1) / 2) + 1);
+    private static boolean isValidIndex(CongaBoard congaBoard, int rowIndex, int colIndex) {
+        return rowIndex < congaBoard.getRows() && rowIndex >= 0 && colIndex < congaBoard.getColumns() && colIndex >= 0;
     }
 
 }
 
+/*
+ * MovesInfo holds all the information about the moves that can be made at a given state
+ */
 class MovesInfo {
+    ArrayList<int[]> startIndices;
     ArrayList<int[]> goalIndices;
     ArrayList<Move> moveType;
-    ArrayList<int[]> startIndices;
+
     MovesInfo() {
         this.startIndices = new ArrayList<>();
         this.goalIndices = new ArrayList<>();
         this.moveType = new ArrayList<>();
     }
 
+    /*
+     * add the move info
+     *
+     * @param   startIndex: index of tile you are moving from
+     * @param   goalIndex: index of tile you are moving to
+     * @param   move: type of move you are making when moving from startIndex to goalIndex
+     */
     public void add(int[] startIndex, int[] goalIndex, Move move) {
         this.startIndices.add(startIndex);
         this.goalIndices.add(goalIndex);
