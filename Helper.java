@@ -9,17 +9,33 @@ public class Helper {
      *
      * @return  evaluation value of the board
      */
-    static int evaluateBoard(CongaBoard congaBoard) {
-        Tile[][] board = congaBoard.getBoard();
+    static int evaluateBoard(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
+        // TODO: count your own states; count other player's states
+        ArrayList<CongaBoard> childStates = Helper.getNextStates(congaBoard, nextPlayer);
+        int opponentStatesCount = childStates.size();
+        childStates = Helper.getNextStates(congaBoard, currentPlayer);
+        int myStatesCount = childStates.size();
+
+        if (opponentStatesCount == 0) {
+            return Integer.MAX_VALUE;
+        } else if (myStatesCount == 0) {
+            return Integer.MIN_VALUE;
+        } else {
+            return myStatesCount - opponentStatesCount;
+        }
+    }
+
+    static int evaluateBoard1(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
         // evalIndex contains all the possible index of neighbors relative to current tile
         int[][] relativeNeighborIndex = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
+        Tile[][] board = congaBoard.getBoard();
         int whiteMove = 0;
         int blackMove = 0;
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 4; col++) {
-                for (int[] index: relativeNeighborIndex) {
+                for (int[] index : relativeNeighborIndex) {
                     try {
-                        if (congaBoard.checkMove(board[row][col], board[row+index[0]][col+index[1]], null) != Move.INVALID) {
+                        if (congaBoard.checkMove(board[row][col], board[row + index[0]][col + index[1]], null) != Move.INVALID) {
                             if (board[row][col].getPlayer().getColor() == Color.BLACK) {
                                 blackMove++;
                             } else {
@@ -53,7 +69,7 @@ public class Helper {
     static ArrayList<CongaBoard> getNextStates(CongaBoard congaBoard, Player currentPlayer) {
         ArrayList<CongaBoard> nextStates = new ArrayList<>();
         Tile[][] board = congaBoard.getBoard();
-        MovesInfo movesInfo = new MovesInfo();
+        MovesInfo movesInfo;
         Tile currentTile;
 
         // Get all the possible moves that current player can make in current board state
@@ -72,17 +88,12 @@ public class Helper {
 
                         Move move = movesInfo.moveType.get(i);
                         newCongaBoard.move(currentTile, goalTile, move);
+                        // TODO: do you have to set board value everytime ??
+                        newCongaBoard.setBoardValue(currentPlayer);
                         nextStates.add(newCongaBoard);
                     }
                 }
             }
-        }
-
-        System.out.println("Possible states: ");
-        System.out.println("Possible states size: " + nextStates.size());
-        // print all the possible states
-        for (CongaBoard b: nextStates) {
-            CongaBoard.printBoard(b);
         }
         return nextStates;
     }

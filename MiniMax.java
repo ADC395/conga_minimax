@@ -1,61 +1,79 @@
+import java.util.ArrayList;
+
 class MiniMax {
-   int test;
-  
-   /* This function computes the MiniMax value for a node in the Tree of states
-    * and implements alpha-beta pruning
-    *
-    * @params	node	Root node of game Tree of possible states
-    * @params	depth	Depth of root node in Tree (0)
-    * @params	isMax	True if player is Max, false if Min
-    * @params	alpha	Alpha value of node, pass MIN_VALUE
-    * @params	beta	Beta value of node, pass MAX_VALUE
-    * 
-    * @return	bestScore	returns Int of score for the move
-    */
-   public int MiniMax(Node node, int depth, boolean isMax, int alpha, int beta) {
-       // DFS
-       // create tree, root = congaBoard
-       // loop for depth = 6
-       // iterative deepeining at level 3 -> watch video
-       // if depth == 6, evaluate the leaf nodes
-       // do the minimax with alpha beta pruning
-       // return most newIndex, optimal board state
-       int bestScore, score;
+	/*
+	 * get the next optimal move
+	 *
+	 * @param	congaBoard: current state of Conga board
+	 * @param	currentPlayer: Current player making move
+	 * @param	nextPlayer: Next player to make move
+	 *
+	 * @return	next best state obtained from our evaluation
+	 */
+	public static CongaBoard getNextMoveState(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
+		// TODO: return most optimal state
+		Node rootNode = new Node(congaBoard, null);
+		return MiniMax.miniMax(rootNode, currentPlayer, nextPlayer, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, true).getCongaBoard();
+	}
 
-       if(node.next == null){
-	       return score;
-       }
-
-       if (isMax){
-		bestScore = Interger.MIN_VALUE;
-		while(node.next != null || depth <= 6){
-			score = this.MiniMax(node, depth + 1, false, alpha, beta);
-			bestScore = Math.Max(bestScore, score);
-			alpha = Math.Max(alpha, bestScore);
-			if (alpha >= beta){
-				break;
-			}
+	/*
+	 * returns the most optimal next state of the game
+	 *
+	 * @param	congaBoard:	current state of Conga board
+	 * @param	currentPlayer: Current player making move
+	 * @param	nextPlayer: Next player to make move
+	 * @param	depth: Cutoff depth for the game tree
+	 * @param	alpha: alpha value for alpha beta pruning
+	 * @param	beta: beta value for alpha beta pruning
+	 * @param	isMaximizingPlayer: true, if it's MAXIMIZER; false, if it's MINIMIZER
+	 *
+	 * @return	best evaluation value
+	 */
+	private static Node miniMax(Node parentNode, Player currentPlayer, Player nextPlayer, int depth, int alpha, int beta, boolean isMaximizingPlayer) {
+		// TODO: Game winning move before the depth, i.e max player has no more move place || min player has no more move
+		// TODO: Implement visited state
+		if (depth == 0) {
+			return parentNode;
 		}
-		return bestScore;
-       }
-
-       else{
-	       bestScore = MAX_VALUE;
-	       while(node.next != null || depth <= 6){
-		       score = this.MiniMax(node, depth + 1, true, alpha, beta);
-		       bestScore = Math.Min(bestScore, score);
-		       alpha = Math.Min(alpha, beestScore);
-		       if (alpha >= beta){
-			       break;
-		       }
-	       }
-	       return bestScore;
-       }
-    }
-
-//    public static void getNextState(CongaBoard congaBoard, Player player) {
-//       Tile[][][] states;
-//    }
+		ArrayList<CongaBoard> childStates =  Helper.getNextStates(parentNode.getCongaBoard(), currentPlayer);
+		// Make a new node for every Conga board state
+		for (CongaBoard childState : childStates) {
+			parentNode.addChild(new Node(childState, parentNode));
+		}
+		if (isMaximizingPlayer) {
+			int maxEval = Integer.MIN_VALUE;
+			for (Node childNode: parentNode.getChildNodes()) {
+				Node nodeTobeEvaluated = miniMax(childNode, currentPlayer, nextPlayer, depth - 1, alpha, beta, false);
+				if (nodeTobeEvaluated != null) {
+					int eval = Helper.evaluateBoard(nodeTobeEvaluated.getCongaBoard(), currentPlayer, nextPlayer);
+					if (eval > maxEval) {
+						parentNode.setBestChildState(childNode);
+					}
+					maxEval = Math.max(maxEval, eval);
+					alpha = Math.max(alpha, eval);
+					if (beta <= alpha) {
+						break;
+					}
+				}
+			}
+			return parentNode.getBestChildState();
+		} else {
+			int minEval = Integer.MAX_VALUE;
+			for (Node childNode: parentNode.getChildNodes()) {
+				Node nodeTobeEvaluated = miniMax(childNode, currentPlayer, nextPlayer, depth - 1, alpha, beta, true);
+				if (nodeTobeEvaluated != null) {
+					int eval = Helper.evaluateBoard(nodeTobeEvaluated.getCongaBoard(), currentPlayer, nextPlayer);
+					if (eval < minEval) {
+						parentNode.setBestChildState(childNode);
+					}
+					minEval = Math.min(minEval, eval);
+					beta = Math.min(beta, eval);
+					if (beta <= alpha) {
+						break;
+					}
+				}
+			}
+			return parentNode.getBestChildState();
+		}
+	}
 }
-
-
