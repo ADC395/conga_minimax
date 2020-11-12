@@ -258,11 +258,11 @@ class CongaBoard {
     /*
      * Print current board
      */
-    public static void printBoard(CongaBoard congaBoard) {
-        for (int row = 0; row < congaBoard.rows; row++) {
+    public void printBoard() {
+        for (int row = 0; row < this.rows; row++) {
             System.out.println("_________________________");
-            for (int col = 0; col < congaBoard.columns; col++) {
-                Tile currentTile = congaBoard.board[row][col];
+            for (int col = 0; col < this.columns; col++) {
+                Tile currentTile =this.board[row][col];
                 // Width of tile is 6
                 if (col == 0) {
                     System.out.print("|");
