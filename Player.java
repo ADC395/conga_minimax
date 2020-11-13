@@ -65,7 +65,7 @@ class Player {
 	/*
 	 * Get the list of occupied tiles
 	 */
-	public ArrayList<Tile> getTiles() {
+	public ArrayList<Tile> getOccupiedTiles() {
 		return this.occupiedTiles;
 	}
 }

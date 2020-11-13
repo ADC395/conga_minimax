@@ -67,7 +67,7 @@ class CongaBoard {
         if (moveType == Move.INVALID) {
             return Move.INVALID;
         } else {
-            this.moveToGoal(startTile, goalTile, startTile, moveType, 0);
+            this.moveToGoal(startTile, goalTile, startTile, moveType, 0, startTile.getCount());
         }
         return moveType;
 
@@ -82,7 +82,7 @@ class CongaBoard {
      * @param   move: Type of move to be made
      */
     public void move(Tile startTile, Tile goalTile, Move move) {
-        this.moveToGoal(startTile, goalTile, startTile, move, 0);
+        this.moveToGoal(startTile, goalTile, startTile, move, 0, startTile.getCount());
     }
 
 
@@ -95,24 +95,25 @@ class CongaBoard {
      * @param   moveType: Type of move to be made from currentTile to goalTile
      * @param   moveCount: Step made so far, starts from 0
      */
-    private void moveToGoal(Tile startTile, Tile goalTile, Tile currentTile, Move moveType, int moveCount) {
+    private void moveToGoal(Tile startTile, Tile goalTile, Tile currentTile, Move moveType, int moveCount, int remainingCounts) {
         // TODO: logic about the move: what if we have pieces already do we carry them along
         // TODO: set the board name when moving
+        currentTile.setPlayer(startTile.getPlayer());
         if (currentTile == goalTile) {
+            goalTile.setCount(goalTile.getCount() + remainingCounts);
             startTile.getPlayer().removeTile(startTile);
             startTile.removePlayer();
-            startTile.setCount(0);
             return;
         }
         Tile nextTile = this.getNextTile(currentTile, goalTile, moveType);
-        nextTile.setPlayer(startTile.getPlayer());
-        nextTile.setCount(nextTile.getCount() + currentTile.getCount() - moveCount);
-
-        currentTile.setCount(moveCount);
+//        nextTile.setPlayer(startTile.getPlayer());
+//        nextTile.setCount(nextTile.getCount() + currentTile.getCount() - moveCount);
+        currentTile.setCount(currentTile.getCount() + moveCount);
         startTile.getPlayer().addTile(nextTile);
+        remainingCounts = remainingCounts - moveCount;
         moveCount++;
 
-        this.moveToGoal(startTile, goalTile, nextTile, moveType, moveCount);
+        this.moveToGoal(startTile, goalTile, nextTile, moveType, moveCount, remainingCounts);
     }
 
     /*

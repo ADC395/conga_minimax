@@ -1,7 +1,51 @@
 import java.util.ArrayList;
 
 // TODO: loop detection, plan is to pass along Arraylist of boardState string
+// TODO: Manhattan distance evaluation
 public class Helper {
+    static double evaluateBoard(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
+        // evalIndex contains all the possible index of neighbors relative to current tile
+        int[][] relativeNeighborIndex = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
+        Tile[][] board = congaBoard.getBoard();
+        double whiteMoveCount = 0;
+        double whiteBadMoveCount = 0;
+        double blackMoveCount = 0;
+        boolean isWhite = false;
+        for (int row = 0; row < 4; row++) {
+            for (int col = 0; col < 4; col++) {
+                if (board[row][col].getPlayer() != null && board[row][col].getPlayer().getColor() == Color.WHITE) {
+                    isWhite = true;
+                }
+                for (int[] index : relativeNeighborIndex) {
+                    try {
+                        if (board[row + index[0]][col + index[1]] == null && isWhite) {
+                            whiteBadMoveCount += 0.5;
+                        } else if (congaBoard.checkMove(board[row][col], board[row + index[0]][col + index[1]], null) != Move.INVALID) {
+                            if (board[row][col].getPlayer().getColor() == Color.BLACK) {
+                                blackMoveCount += 0.7;
+                            } else {
+                                if (isWhite) {
+                                    whiteBadMoveCount += 0.8;
+                                }
+                                whiteMoveCount++;
+                            }
+                        }
+                    } catch (ArrayIndexOutOfBoundsException ignored) {
+                    }
+                }
+                isWhite = false;
+            }
+        }
+        // White is our maximizer, black is our minimizer
+        if (blackMoveCount == 0) {
+            return Integer.MAX_VALUE;
+        } else if (whiteMoveCount == 0) {
+            return Integer.MIN_VALUE;
+        } else {
+            // Current score of board = total degree of freedom of white - black
+            return  whiteMoveCount - blackMoveCount - whiteBadMoveCount;
+        }
+    }
     /*
      * Static evaluator of the CongaBoard
      *
@@ -9,8 +53,9 @@ public class Helper {
      *
      * @return  evaluation value of the board
      */
-    static int evaluateBoard(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
+    static double evaluateBoard1(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
         // TODO: count your own states; count other player's states
+//        return evaluateBoard1(congaBoard, currentPlayer, nextPlayer);
         ArrayList<CongaBoard> childStates = Helper.getNextStates(congaBoard, nextPlayer);
         int opponentStatesCount = childStates.size();
         childStates = Helper.getNextStates(congaBoard, currentPlayer);
@@ -25,38 +70,6 @@ public class Helper {
         }
     }
 
-    static int evaluateBoard1(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
-        // evalIndex contains all the possible index of neighbors relative to current tile
-        int[][] relativeNeighborIndex = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
-        Tile[][] board = congaBoard.getBoard();
-        int whiteMove = 0;
-        int blackMove = 0;
-        for (int row = 0; row < 4; row++) {
-            for (int col = 0; col < 4; col++) {
-                for (int[] index : relativeNeighborIndex) {
-                    try {
-                        if (congaBoard.checkMove(board[row][col], board[row + index[0]][col + index[1]], null) != Move.INVALID) {
-                            if (board[row][col].getPlayer().getColor() == Color.BLACK) {
-                                blackMove++;
-                            } else {
-                                whiteMove++;
-                            }
-                        }
-                    } catch (ArrayIndexOutOfBoundsException ignored) {
-                    }
-                }
-            }
-        }
-        // White is our maximizer, black is our minimizer
-        if (blackMove == 0) {
-            return Integer.MAX_VALUE;
-        } else if (whiteMove == 0) {
-            return Integer.MIN_VALUE;
-        } else {
-            // Current score of board = total degree of freedom of white - black
-            return whiteMove - blackMove;
-        }
-    }
 
     /*
      * Get the list of children states from current Conga board state

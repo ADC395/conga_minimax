@@ -1,20 +1,6 @@
 import java.util.ArrayList;
 
 class MiniMax {
-	/*
-	 * get the next optimal move
-	 *
-	 * @param	congaBoard: current state of Conga board
-	 * @param	currentPlayer: Current player making move
-	 * @param	nextPlayer: Next player to make move
-	 *
-	 * @return	next best state obtained from our evaluation
-	 */
-	public static CongaBoard getNextMoveState(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
-		// TODO: return most optimal state
-		Node rootNode = new Node(congaBoard, null);
-		return MiniMax.miniMax(rootNode, currentPlayer, nextPlayer, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, true).getCongaBoard();
-	}
 
 	/*
 	 * returns the most optimal next state of the game
@@ -29,7 +15,7 @@ class MiniMax {
 	 *
 	 * @return	best evaluation value
 	 */
-	private static Node miniMax(Node parentNode, Player currentPlayer, Player nextPlayer, int depth, int alpha, int beta, boolean isMaximizingPlayer) {
+	private static Node miniMax(Node parentNode, Player currentPlayer, Player nextPlayer, int depth, double alpha, double beta, boolean isMaximizingPlayer) {
 		// TODO: Game winning move before the depth, i.e max player has no more move place || min player has no more move
 		// TODO: Implement visited state
 		if (depth == 0) {
@@ -41,11 +27,11 @@ class MiniMax {
 			parentNode.addChild(new Node(childState, parentNode));
 		}
 		if (isMaximizingPlayer) {
-			int maxEval = Integer.MIN_VALUE;
+			double maxEval = Integer.MIN_VALUE;
 			for (Node childNode: parentNode.getChildNodes()) {
 				Node nodeTobeEvaluated = miniMax(childNode, currentPlayer, nextPlayer, depth - 1, alpha, beta, false);
 				if (nodeTobeEvaluated != null) {
-					int eval = Helper.evaluateBoard(nodeTobeEvaluated.getCongaBoard(), currentPlayer, nextPlayer);
+					double eval = Helper.evaluateBoard(nodeTobeEvaluated.getCongaBoard(), currentPlayer, nextPlayer);
 					if (eval > maxEval) {
 						parentNode.setBestChildState(childNode);
 					}
@@ -58,11 +44,11 @@ class MiniMax {
 			}
 			return parentNode.getBestChildState();
 		} else {
-			int minEval = Integer.MAX_VALUE;
+			double minEval = Integer.MAX_VALUE;
 			for (Node childNode: parentNode.getChildNodes()) {
 				Node nodeTobeEvaluated = miniMax(childNode, currentPlayer, nextPlayer, depth - 1, alpha, beta, true);
 				if (nodeTobeEvaluated != null) {
-					int eval = Helper.evaluateBoard(nodeTobeEvaluated.getCongaBoard(), currentPlayer, nextPlayer);
+					double eval = Helper.evaluateBoard(nodeTobeEvaluated.getCongaBoard(), currentPlayer, nextPlayer);
 					if (eval < minEval) {
 						parentNode.setBestChildState(childNode);
 					}
@@ -75,5 +61,20 @@ class MiniMax {
 			}
 			return parentNode.getBestChildState();
 		}
+	}
+
+	/*
+	 * get the next optimal move
+	 *
+	 * @param	congaBoard: current state of Conga board
+	 * @param	currentPlayer: Current player making move
+	 * @param	nextPlayer: Next player to make move
+	 *
+	 * @return	next best state obtained from our evaluation
+	 */
+	public static CongaBoard getNextMoveState(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
+		// TODO: return most optimal state
+		Node rootNode = new Node(congaBoard, null);
+		return MiniMax.miniMax(rootNode, currentPlayer, nextPlayer, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, true).getCongaBoard();
 	}
 }
