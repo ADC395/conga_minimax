@@ -43,7 +43,6 @@ class Player {
 	 * @param	tile: tile to be removed from the list
 	 */
 	public void removeTile(Tile tile){
-		// TODO: check if this function is working
 		this.occupiedTiles.removeIf(t -> t.equals(tile));
 	}
 
@@ -58,7 +57,6 @@ class Player {
 			return false;
 		}
 		final Player other = (Player) obj;
-		// TODO: implement check for occupiedTiles
 		return this.color == other.getColor();
 	}
 

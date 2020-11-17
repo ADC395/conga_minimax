@@ -96,8 +96,6 @@ class CongaBoard {
      * @param   moveCount: Step made so far, starts from 0
      */
     private void moveToGoal(Tile startTile, Tile goalTile, Tile currentTile, Move moveType, int moveCount, int remainingCounts) {
-        // TODO: logic about the move: what if we have pieces already do we carry them along
-        // TODO: set the board name when moving
         currentTile.setPlayer(startTile.getPlayer());
         if (currentTile == goalTile) {
             goalTile.setCount(goalTile.getCount() + remainingCounts);

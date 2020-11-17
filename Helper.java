@@ -1,72 +1,57 @@
 import java.util.ArrayList;
 
-// TODO: loop detection, plan is to pass along Arraylist of boardState string
-// TODO: Manhattan distance evaluation
 public class Helper {
     static double evaluateBoard(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
-        // evalIndex contains all the possible index of neighbors relative to current tile
         int[][] relativeNeighborIndex = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}};
         Tile[][] board = congaBoard.getBoard();
-        double whiteMoveCount = 0;
-        double whiteBadMoveCount = 0;
-        double blackMoveCount = 0;
-        boolean isWhite = false;
+        double blackScore, whiteScore;
+        double blackMoves, whiteMoves;
+        blackMoves = 0;
+        whiteMoves = 0;
+        blackScore = 0;
+        whiteScore = 0;
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 4; col++) {
-                if (board[row][col].getPlayer() != null && board[row][col].getPlayer().getColor() == Color.WHITE) {
-                    isWhite = true;
-                }
                 for (int[] index : relativeNeighborIndex) {
                     try {
-                        if (board[row + index[0]][col + index[1]] == null && isWhite) {
-                            whiteBadMoveCount += 0.5;
-                        } else if (congaBoard.checkMove(board[row][col], board[row + index[0]][col + index[1]], null) != Move.INVALID) {
-                            if (board[row][col].getPlayer().getColor() == Color.BLACK) {
-                                blackMoveCount += 0.7;
-                            } else {
-                                if (isWhite) {
-                                    whiteBadMoveCount += 0.8;
-                                }
-                                whiteMoveCount++;
+                        // Check number of moves for each player
+                        if(congaBoard.checkMove(board[row][col], board[row + index[0]][col + index[1]], null) != Move.INVALID){
+                            if(board[row][col].getPlayer() != null && board[row][col].getPlayer().getColor() == Color.BLACK){
+                                blackMoves++;
+                            }
+                            else if(board[row][col].getPlayer() != null && board[row][col].getPlayer().getColor() == Color.WHITE){
+                                whiteMoves++;
                             }
                         }
-                    } catch (ArrayIndexOutOfBoundsException ignored) {
+                        // Check tile for Black
+                        if (board[row][col].getPlayer() != null && board[row][col].getPlayer().getColor() == Color.BLACK) {
+                            if(board[row + index[0]][col + index[1]].getPlayer() != null && board[row + index[0]][col + index[1]].getPlayer().getColor() == Color.WHITE) {
+                                whiteScore += board[row][col].getCount() - board[row + index[0]][col + index[1]].getCount();
+                            }
+                            if(board[row + index[0]][col + index[1]].getPlayer() == null){
+                                blackScore ++;
+                            }
+                        }if (board[row][col].getPlayer() != null && board[row][col].getPlayer().getColor() == Color.WHITE) {
+                            if (board[row][col].getCount() > 1) {
+                                whiteScore -= (board[row][col].getCount() - 1);
+                            }
+                        }
+//
+                    }  catch (ArrayIndexOutOfBoundsException ignored) {
                     }
                 }
-                isWhite = false;
+
             }
         }
-        // White is our maximizer, black is our minimizer
-        if (blackMoveCount == 0) {
-            return Integer.MAX_VALUE;
-        } else if (whiteMoveCount == 0) {
-            return Integer.MIN_VALUE;
-        } else {
-            // Current score of board = total degree of freedom of white - black
-            return  whiteMoveCount - blackMoveCount - whiteBadMoveCount;
-        }
-    }
-    /*
-     * Static evaluator of the CongaBoard
-     *
-     * @param   congaBoard
-     *
-     * @return  evaluation value of the board
-     */
-    static double evaluateBoard1(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
-        // TODO: count your own states; count other player's states
-//        return evaluateBoard1(congaBoard, currentPlayer, nextPlayer);
-        ArrayList<CongaBoard> childStates = Helper.getNextStates(congaBoard, nextPlayer);
-        int opponentStatesCount = childStates.size();
-        childStates = Helper.getNextStates(congaBoard, currentPlayer);
-        int myStatesCount = childStates.size();
 
-        if (opponentStatesCount == 0) {
+        // White is our maximizer, black is our minimizer
+        if (blackMoves == 0) {
             return Integer.MAX_VALUE;
-        } else if (myStatesCount == 0) {
+        } else if (whiteMoves == 0) {
             return Integer.MIN_VALUE;
         } else {
-            return myStatesCount - opponentStatesCount;
+            // Difference of white score and black score, plus difference of number of tiles owned
+            return  (whiteScore - blackScore) + (currentPlayer.getOccupiedTiles().size() - nextPlayer.getOccupiedTiles().size());
         }
     }
 
@@ -101,7 +86,7 @@ public class Helper {
 
                         Move move = movesInfo.moveType.get(i);
                         newCongaBoard.move(currentTile, goalTile, move);
-                        // TODO: do you have to set board value everytime ??
+
                         newCongaBoard.setBoardValue(currentPlayer);
                         nextStates.add(newCongaBoard);
                     }
@@ -228,4 +213,3 @@ class MovesInfo {
         this.moveType.add(move);
     }
 }
-// TODO: use player occupied tile to make efficient

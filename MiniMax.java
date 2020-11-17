@@ -16,8 +16,6 @@ class MiniMax {
 	 * @return	best evaluation value
 	 */
 	private static Node miniMax(Node parentNode, Player currentPlayer, Player nextPlayer, int depth, double alpha, double beta, boolean isMaximizingPlayer) {
-		// TODO: Game winning move before the depth, i.e max player has no more move place || min player has no more move
-		// TODO: Implement visited state
 		if (depth == 0) {
 			return parentNode;
 		}
@@ -73,7 +71,6 @@ class MiniMax {
 	 * @return	next best state obtained from our evaluation
 	 */
 	public static CongaBoard getNextMoveState(CongaBoard congaBoard, Player currentPlayer, Player nextPlayer) {
-		// TODO: return most optimal state
 		Node rootNode = new Node(congaBoard, null);
 		return MiniMax.miniMax(rootNode, currentPlayer, nextPlayer, 4, Integer.MIN_VALUE, Integer.MAX_VALUE, true).getCongaBoard();
 	}
