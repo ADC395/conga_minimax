@@ -1,5 +1,3 @@
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -26,9 +24,6 @@ public class Main {
 //        System.out.println("Current board state: ");
 //        congaBoard.printBoard();
 
-        File file = new File("C:/Users/Adam1/Desktop/Programming Projects/Projects/MiniMax/stats.csv");
-        FileWriter csvWriter = new FileWriter(file);
-
         while (games <= 1){
             currentPlayer = (int) (Math.random() * 10) % 2 == 0 ? player1 : player2;
             // Initialize the Conga board
@@ -36,12 +31,21 @@ public class Main {
             congaBoard.setBoardValue(currentPlayer);
             System.out.println("Current board state: ");
             congaBoard.printBoard();
+            MiniMax miniMax = new MiniMax();
 
             while (true) {
                 // Minimax Agent playing
                 if (currentPlayer == player1) {
                     System.out.println("Current turn: MINIMAX Agent (WHITE)");
-                    congaBoard = MiniMax.getNextMoveState(congaBoard, player1, player2);
+                    congaBoard = miniMax.getNextMoveState(congaBoard, player1, player2);
+
+                    System.out.println("Number of nodes explored " + miniMax.nodesExplored);
+                    System.out.println("Number of nodes pruned " + miniMax.nodesPruned);
+
+                    // Reset pruned - explored
+                    miniMax.setNodesExplored(0);
+                    miniMax.setNodesPruned(0);
+
                 } else {
                     //random agent playing
                     System.out.println("Current turn: RANDOM Agent (BLACK)");
@@ -54,25 +58,9 @@ public class Main {
                 double eval = Helper.evaluateBoard(congaBoard, player1, player2);
                 if (eval == Integer.MAX_VALUE) {
                     System.out.println("MINIMAX AGENT(WHITE) won in " + moveCount + " steps.");
-
-                    csvWriter.append("White");
-                    csvWriter.append(",");
-                    csvWriter.append(Integer.toString((moveCount)));
-                    csvWriter.append(",");
-                    csvWriter.append("1");
-                    csvWriter.append("\n");
-
                     break;
                 } else if (eval == Integer.MIN_VALUE) {
                     System.out.println("RANDOM AGENT(BLACK) won!" + moveCount + " steps.");
-
-                    csvWriter.append("Black");
-                    csvWriter.append(",");
-                    csvWriter.append(Integer.toString((moveCount)));
-                    csvWriter.append(",");
-                    csvWriter.append("1");
-                    csvWriter.append("\n");
-
                     break;
                 }
                 // change player
@@ -81,16 +69,10 @@ public class Main {
                 System.out.println(" Move Count: " + moveCount);
                 System.out.println("----------------------------------------------------------------");
                 if(moveCount >= 150){
-                    csvWriter.append("None");
-                    csvWriter.append(",");
-                    csvWriter.append(Integer.toString((moveCount)));
-                    csvWriter.append(",");
-                    csvWriter.append("1");
-                    csvWriter.append("\n");
+                    System.out.println("Move timeout - Agent did not win in under 150 Moves");
                     break;
                 }
             }
-            csvWriter.flush();
             moveCount = 0;
             games++;
         }
